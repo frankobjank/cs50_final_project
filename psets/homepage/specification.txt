@@ -1,0 +1,28 @@
+html properties:
+header
+main
+div
+button
+p
+a
+h1
+h4
+div
+img
+
+css selectors:
+.card
+.card-button:hover
+.card-button
+h1
+header
+
+css properties:
+background-color
+color
+text-decoration
+transition
+border
+
+I'm making a page for my coding projects. I started with a couple of games I made. They were written in Python and I'm hoping I'll learn in week 9 or 10 how to implement the server side of things in Python.
+

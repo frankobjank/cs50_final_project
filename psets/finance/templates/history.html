@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+    {% if history %}
+        <table class="history table table-striped">
+            <thead>
+                <h2>History</h2>
+                {% for key in history[0].keys() %}
+                    {% if key == "per_share" %}
+                        <th>
+                            $ Per Share
+                        </th>
+                    {% else %}
+                        <th>
+                            {{ key | title }}
+                        </th>
+                    {% endif %}
+                {% endfor %}
+            </thead>
+            <tbody>
+                {% for row in history %}
+                    <tr>
+                        {% for val in row.values() %}
+                            <td>
+                                {{ val }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <h2>No transactions found.</h2>
+    {% endif %}
+{% endblock %}

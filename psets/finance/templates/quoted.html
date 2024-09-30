@@ -1,0 +1,17 @@
+{% extends "quote.html" %}
+
+{% block results %}
+    <table class="table table-striped">
+        {% for key in result.keys() %}
+            <th>{{ key | title }}</th>
+        {% endfor %}
+
+        <tr>
+            {% for value in result.values() %}
+                <td>
+                    {{ value }}
+                </td>
+            {% endfor %}
+        </tr>
+    </table>
+{% endblock %}

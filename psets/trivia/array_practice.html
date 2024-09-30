@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+    <body>
+        <h1>JavaScript Objects</h1>
+        <h2>Display Properties</h2>
+        <header>
+            this is header.
+        </header>
+        <main id="demo">
+            this is main.
+        </main>
+        <footer id="test">
+            this is footer.
+        </footer>
+
+        <script>
+            // Create an Object
+            const person1 = {
+                name: "John",
+                age: 30,
+                city: "New York"
+            };
+
+            const person2 = {
+                name: "Jim",
+                age: 22,
+                city: "Phildalphia"
+            };
+
+            const people = [person1, person2]
+
+            // Build a Text
+            let text = "";
+            for (let p in people) {
+                for (let x in people[p]) {
+                    text += people[p][x] + " - ";
+                };
+                text += "<br>"
+            };
+
+            // Display the Text
+            document.getElementById("demo").innerHTML += text;
+            document.getElementById("test").innerHTML += text;
+        </script>
+    </body>
+
+</html>
