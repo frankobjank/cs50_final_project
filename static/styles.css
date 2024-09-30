@@ -45,11 +45,13 @@ h1 {
     vertical-align: middle;
 }
 
+/* removing footer for now
 footer {
     background-color: #121111;
     color: #ffffff;
     text-align: center;
-    height: 50px;           /* Set a fixed height for the footer */
-    width: 80%;             /* Half width */
+    height: 50px;
+    width: 80%;            
     margin-bottom: 0;
 }
+*/

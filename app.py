@@ -25,7 +25,9 @@ def index():
     return flask.render_template("index.html")
 
 
-@app.route("/minesweeper")
+@app.route("/minesweeper", methods=["GET", "POST"])
 def minesweeper():
-
-    return flask.render_template("minesweeper.html")
+    if flask.request.method == "POST":
+        user_input = flask.request.form.get("symbol")
+    else:
+        return flask.render_template("minesweeper.html")
