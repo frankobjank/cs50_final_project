@@ -1,45 +1,19 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Portfolio
+    Home
 {% endblock %}
 
 {% block main %}
-    <table class="portfolio table table-striped">
-        {% if portfolio%}
-        <thead>
-            <h2>Portfolio</h2>
-            {% for key in portfolio[0].keys() %}
-                <th>
-                    {{ key | title }}
-                </th>
-            {% endfor %}
-        </thead>
-        <tbody>
-            {% for stock in portfolio %}
-                <tr>
-                    {% for val in stock.values() %}
-                        <td>
-                            {{ val }}
-                        </td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-        {% endif %}
-        <tfoot>
-            <tr>
-                <td></td>
-                <td></td>
-                <th>Cash</th>
-                <td>{{ totals["cash"] | usd }}</td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <th>TOTAL</th>
-                <td>{{ totals["grand_total"] | usd }}</td>
-            </tr>
-        </tfoot>
-    </table>
+    <div class="container ctr-custom">
+        <div class="card">
+            <a href="/minesweeper" class="btn-custom">
+                <div class="card-body">
+                    <h4 class="card-title">Minesweeper</h4>
+                    <p class="card-text">Flag all the mines as quickly as possible.<br></p>
+                </div>
+                <img src="/assets/minesweeper_screenshot.png" class="card-img-top" alt="Minesweeper screenshot">
+            </a>
+        </div>
+    </div>
 {% endblock %}

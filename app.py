@@ -1,15 +1,13 @@
 import flask
 
+# link to access app for debug http://127.0.0.1:5000
+
 # Configure application
 app = flask.Flask(__name__)
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-flask.Session(app)
-
-# figure out how to do regular db fetch without cs50
-# db = SQL("sqlite:///finance.db")
 
 
 @app.after_request
@@ -25,3 +23,9 @@ def after_request(response):
 def index():
 
     return flask.render_template("index.html")
+
+
+@app.route("/minesweeper")
+def minesweeper():
+
+    return flask.render_template("minesweeper.html")
