@@ -5,5 +5,22 @@
 {% endblock %}
 
 {% block main %}
-    <a href="/" class="btn-custom">Back to homepage</a>
+    <table class="minesweeper">
+        <thead>
+
+        </thead>
+        
+        <tbody>
+            <!-- create board and pass coords from app.py -->
+            {% for i in range(10) %}
+                {% for j in range(10) %}
+                    <button class="square" name="selected"></button>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="nav">
+        <a href="/" class="btn-custom">Back to homepage</a>
+    </div>
 {% endblock %}

@@ -25,6 +25,18 @@ h1 {
     height: fixed;
 }
 
+.nav {
+    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
+    padding: 2rem 1.5rem;
+    justify-content: center;
+}
+
+button {
+    height: 1rem;
+    width: 1rem;
+}
+
 .btn-custom:hover {
     background-color: #bbbbbb;
     color: #000000;

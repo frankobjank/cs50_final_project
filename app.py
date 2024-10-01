@@ -1,9 +1,9 @@
-import flask
+import flask as fl
 
 # link to access app for debug http://127.0.0.1:5000
 
 # Configure application
-app = flask.Flask(__name__)
+app = fl.Flask(__name__)
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
@@ -22,12 +22,16 @@ def after_request(response):
 @app.route("/")
 def index():
 
-    return flask.render_template("index.html")
+    return fl.render_template("index.html")
 
 
 @app.route("/minesweeper", methods=["GET", "POST"])
 def minesweeper():
-    if flask.request.method == "POST":
-        user_input = flask.request.form.get("symbol")
+    
+    if fl.request.method == "POST":
+        user_input = fl.request.form.get("selected")
+        
+        print(user_input)
+
     else:
-        return flask.render_template("minesweeper.html")
+        return fl.render_template("minesweeper.html")
