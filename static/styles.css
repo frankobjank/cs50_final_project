@@ -11,6 +11,10 @@ h1 {
     font-weight: bold;
 }
 
+.board {
+    justify-content: center;
+}
+
 .ctr-custom {
     display: flex;
     flex-wrap: wrap;  /* Allow items to wrap onto the next line */

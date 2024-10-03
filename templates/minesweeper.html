@@ -7,22 +7,50 @@
 {% block main %}
     <table class="minesweeper">
         <thead>
-
+            
         </thead>
         
-        <tbody>
-            <button onclick="checkSquare()" class="square" name="b"></button>
-            <ul></ul>
+        <tbody class="board">
+            <button onclick="checkSquare()" class="square" name="b" id="{{ one_square.point }}"></button>
+            <tr>
+                <td>.x: {{ one_square.x }}</td>
+            </tr>
+            <tr>
+                <td>.y: {{ one_square.y }}</td>
+            </tr>
+            <tr>
+                <td>.adj: {{ one_square.adj }}</td>
+            </tr>
+            <tr>
+                <td>.mine: {{ one_square.mine }}</td>
+            </tr>
+            <tr>
+                <td>.flag: {{ one_square.flag }}</td>
+            </tr>
+            <tr>
+                <td>.visible: {{ one_square.visible }}</td>
+            </tr>
+            <tr>
+                <td>.blow_up: {{ one_square.blow_up }}</td>
+            </tr>
         </tbody>
     </table>
 
     <script>
         function checkSquare() {
             $.ajax({
+                dataType: 'json',
                 type: 'POST',
                 url: "{{ url_for('minesweeper') }}",
-                data: {"name": "test"}
+                data: {"name": 'test'},
+                success: success
             })
+            
+            console.log("first element of square id " + document.querySelector('.square').id[0])
+        }
+        
+        function success(){
+            console.log("square id " + document.querySelector('.square').id)
         }
     </script>
     
