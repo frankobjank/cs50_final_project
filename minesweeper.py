@@ -99,6 +99,10 @@ class State:
         return time.time() - self.start_time
     
 
+    def get_mines_remaining(self):
+        return self.num_mines - len(self.flags)
+    
+
     def set_difficulty(self, difficulty):
         if difficulty == "easy":
             self.width, self.height, self.num_mines = 10, 10, 10
@@ -135,7 +139,7 @@ class State:
 
         # calc adj to mines
         for mine in self.mines:
-            mine.get_adjacent_to_mines(state)
+            mine.get_adjacent_to_mines(state=self)
         empty_squares = []
         for sq in self.squares.values():
             if sq.mine == False:
@@ -144,15 +148,12 @@ class State:
                 else:
                     empty_squares.append(sq)
 
-        self.mines_remaining = self.num_mines - len(self.flags)
+        self.mines_remaining = self.get_mines_remaining()
 
 
     def get_random_coords(self):
         return Point(random.randrange(self.width), random.randrange(self.height))
 
 
-
-
-
-state = State()
-state.create_board(difficulty="easy", fixed_mines=True)
+# state = State()
+# state.create_board(difficulty="easy", fixed_mines=True)

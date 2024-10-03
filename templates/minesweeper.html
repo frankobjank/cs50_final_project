@@ -11,14 +11,20 @@
         </thead>
         
         <tbody>
-            <!-- create board and pass coords from app.py -->
-            {% for i in range(10) %}
-                {% for j in range(10) %}
-                    <button class="square" name="selected"></button>
-                {% endfor %}
-            {% endfor %}
+            <button onclick="checkSquare()" class="square" name="b"></button>
+            <ul></ul>
         </tbody>
     </table>
+
+    <script>
+        function checkSquare() {
+            $.ajax({
+                type: 'POST',
+                url: "{{ url_for('minesweeper') }}",
+                data: {"name": "test"}
+            })
+        }
+    </script>
     
     <div class="nav">
         <a href="/" class="btn-custom">Back to homepage</a>
