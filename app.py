@@ -37,16 +37,17 @@ def minesweeper():
     
     if fl.request.method == "POST":
         print(fl.request.form)
-        return_value = fl.request.form.get("name")
     
         # flask requires a return value; 204 status will keep browser on current page
         return ("", 204)
 
     else:
 
-        squares_JSON = fl.jsonify([s.serialize() for s in mstate.squares.values()])
-        print(squares_JSON.get_json())
-        return fl.render_template("minesweeper.html", squares=squares_JSON, width=mstate.width, height=mstate.height)
+        squares = fl.jsonify(mstate.build_packet())
+        
+        print(squares.get_json())
+
+        return fl.render_template("minesweeper.html", squares = squares, width = mstate.width, height = mstate.height)
     
 
 # template for button once things are established

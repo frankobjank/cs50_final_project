@@ -2,6 +2,7 @@ import random
 import time
 from collections import deque, namedtuple
 
+
 Point = namedtuple("Point", ("x", "y"))
 
 
@@ -176,7 +177,11 @@ class State:
                 packet["flags"].append(0)
 
             if s.visible:
-                packet["flags"].append(1)
+                packet["visible"].append(1)
+            elif not s.visible:
+                packet["visible"].append(0)
+        
+        return packet
 
 
 

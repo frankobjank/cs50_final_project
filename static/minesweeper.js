@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
-
+    console.log(squares)
+    let board = {
+        'adj': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 1, 1, 1, 0, 0, 1, 2, 1, 1, 0, 1, 0, 2, 1, 0, 0, 1, 1, 1, 1, 1, 3, 0, 2, 0, 2, 3, 2, 0, 1, 0, 2, 0, 2, 0, 0, 2, 0, 2, 1, 0, 1, 1, 1, 0, 1, 3, 2, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0], 
+        'flags': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'visible': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+    
     // Insert the table into the DOM
-    n = document.querySelector('.t');
-    console.log(n);
-    document.getElementById('table-container').appendChild(createTable(10, 10));
+    document.getElementById('table-container').appendChild(createTable(10, 10, board));
 
 })
+
 
 function checkSquare() {
     $.ajax({
@@ -19,48 +24,29 @@ function checkSquare() {
     console.log("first element of square id " + document.querySelector('.square').id[0])
 }
 
+
 function success(){
     console.log("square id " + document.querySelector('.square').id)
 }
 
 
-
-function createTable(rows, cols) {
+function createTable(width, height, squares) {
     // Create table element
     const table = document.createElement('table');
-    
-    // Create thead and add header row
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-
-    // First header cell (Row\Col)
-    const firstHeaderCell = document.createElement('th');
-    firstHeaderCell.textContent = 'Row\\Col';
-    headerRow.appendChild(firstHeaderCell);
-
-    // Generate column headers
-    for (let col = 1; col <= cols; col++) {
-        const th = document.createElement('th');
-        th.textContent = col;
-        headerRow.appendChild(th);
-    }
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
 
     // Create tbody and generate table rows
     const tbody = document.createElement('tbody');
-    for (let row = 1; row <= rows; row++) {
+    for (let y = 0; y < height; y++) {
         const tr = document.createElement('tr');
-        
-        // Create the first column (row header)
-        const rowHeader = document.createElement('th');
-        rowHeader.textContent = row;
-        tr.appendChild(rowHeader);
 
         // Create table data cells for each column in this row
-        for (let col = 1; col <= cols; col++) {
+        for (let x = 0; x < width; x++) {
             const td = document.createElement('td');
-            td.textContent = `${row},${col}`;
+            let index = y * height + x;
+
+            let value = squares.adj[index];
+
+            td.textContent = value;
             tr.appendChild(td);
         }
 
