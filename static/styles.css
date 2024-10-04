@@ -11,8 +11,27 @@ h1 {
     font-weight: bold;
 }
 
-.board {
-    justify-content: center;
+/* Remove blue outline for minesweeper squares */
+.square:focus{
+    outline: 0;
+}
+
+#board-container {
+    display: flex;
+    justify-content: center;  /* Center horizontally */
+    align-items: center;      /* Center vertically */
+}
+
+tr, td {
+    margin-top: 0;
+    padding: 0;
+    height: 1rem;
+    width: 1rem;
+}
+
+button {
+    height: 2.5rem;
+    width: 2.5rem;
 }
 
 .ctr-custom {
@@ -33,11 +52,6 @@ h1 {
     margin-top: 1.5rem;
     padding: 2rem 1.5rem;
     justify-content: center;
-}
-
-button {
-    height: 1rem;
-    width: 1rem;
 }
 
 .btn-custom:hover {

@@ -1,6 +1,6 @@
 import random
 import time
-from collections import deque, namedtuple
+from collections import namedtuple
 
 
 Point = namedtuple("Point", ("x", "y"))
@@ -19,44 +19,22 @@ class Square:
 
     def __repr__(self):
         return f"Square at ({self.x}, {self.y}), mine = {self.mine}, adj = {self.adj}"
-    
 
-    def serialize(self):     
-        # Can get x, y from index.
-        # Only need to send adj, flag, vis
-        
-        return {
-            "adj": self.adj,
-            "flag": self.flag,
-            "visible": self.visible
-        }
 
     # get number of adjacent mines but not mines themselves. Make sure it's in range i.e. .get()
     def get_adjacent_to_mines(self, state):
         for dy in [-1, 0, 1]:
             for dx in [-1, 0, 1]:
                 adj = state.squares.get((self.x+dx, self.y+dy), None)
-                if adj != None and adj != self and adj.mine == False:
+                if adj is not None and adj != self and not adj.mine:
                     adj.adj += 1
-
-
-    # get adjacent not-visible squares that aren't mines or flags
-    def get_adjacent_recursive_animation(self, state):
-        state.to_reveal.appendleft(self)
-        for dy in [-1, 0, 1]:
-            for dx in [-1, 0, 1]:
-                adj = state.squares.get((self.x+dx, self.y+dy), None)
-                if adj != None and adj != self and adj.visible == False and adj not in state.to_reveal:
-                    state.to_reveal.appendleft(adj)
-                    if adj.adj == 0: # if adj is empty, run again
-                        adj.get_adjacent_recursive_animation(state)
     
 
     def get_adjacent_recursive(self, state):
         for dy in [-1, 0, 1]:
             for dx in [-1, 0, 1]:
                 adj = state.squares.get((self.x+dx, self.y+dy), None)
-                if adj != None and adj != self and adj.visible == False:
+                if adj is not None and adj != self and not adj.visible:
                     adj.visible = True
                     if adj.adj == 0: # if adj is empty, run again
                         adj.get_adjacent_recursive(state)
@@ -67,7 +45,7 @@ class Square:
         for dy in [-1, 0, 1]:
             for dx in [-1, 0, 1]:
                 adj = state.squares.get((self.x+dx, self.y+dy), None)
-                if adj != None and adj != self:
+                if adj is not None and adj != self:
                     neighbors.add(adj)
 
         return neighbors
@@ -98,20 +76,43 @@ class State:
         self.game_time = 0
         self.score = 0
 
-        self.animate = False
-        self.to_reveal = deque() # for animating reveal
-        self.revealing_square = None # for animating reveal
-        self.origin = None # for animating reveal
-        self.frame_count = 0 # for animating reveal
+        self.blow_up = None
     
 
     def get_game_time(self):
         return time.time() - self.start_time
     
 
-    def get_mines_remaining(self):
+    def get_mines_remaining(self) -> int:
         return self.num_mines - len(self.flags)
     
+
+    def coord_to_index(self, coords: tuple) -> int:
+        # validate
+        if len(coords) != 2:
+            print("Tuple must have 2 items.")
+            return None
+
+        if coords[0] > self.width - 1 or coords[1] > self.height - 1:
+            print("Coords out of bounds.")
+            return None
+
+        # y * self.width + x
+        return coords[1] * self.width + coords[0]
+
+
+    def index_to_coords(self, i: int) -> tuple:
+        # validate
+        if i > self.height * self.width:
+            print("Index out of bounds.")
+            return None
+
+        # Can use modulo or divmod
+        # x = i % self.width, y = i // self.width
+
+        dm = divmod(i, self.width)
+        return (dm[1], dm[0])
+
 
     def set_difficulty(self, difficulty):
         if difficulty == "easy":
@@ -129,8 +130,8 @@ class State:
         # create all squares - dict
         self.squares = {(x, y): Square(x, y) for y in range(self.height) for x in range(self.width)}
 
-        # fixed_mines mines for debugging
-        if fixed_mines == True:
+        # Fixed_mines mines for debugging
+        if fixed_mines:
             self.mines = set(
                 self.squares[(mine_coord)] for mine_coord in [
                     (1, 2), (6, 4), (2, 3), (0, 5), (7, 5),
@@ -139,19 +140,19 @@ class State:
             for mine in self.mines:
                 self.squares[(mine.x, mine.y)].mine = True
 
-        # random mines
+        # Assign random mines; not debug
         else:
             while len(self.mines) < self.num_mines:
                 mine = (self.get_random_coords())
                 self.mines.add(self.squares[(mine.x, mine.y)])
                 self.squares[(mine.x, mine.y)].mine = True
 
-        # calc adj to mines
+        # Calc adj to mines
         for mine in self.mines:
             mine.get_adjacent_to_mines(state=self)
         empty_squares = []
         for sq in self.squares.values():
-            if sq.mine == False:
+            if not sq.mine:
                 if sq.adj > 0:
                     self.adjacent_to_mines.add(sq)
                 else:
@@ -165,26 +166,41 @@ class State:
 
 
     def build_packet(self):
-        # Only need to return adj, list of indices of flags; visible squares
-        packet = {"width": self.width, "height": self.height, "adj": [], "flags": [], "visible": []}
+        # Only need to return adj; visible squares. Flags can be handled by client
+        packet = {"width": self.width, "height": self.height, "adj": [], "visible": []}
 
         for s in self.squares.values():
             packet["adj"].append(s.adj)
-            
-            if s.flag:
-                packet["flags"].append(1)
-            elif not s.flag:
-                packet["flags"].append(0)
 
             if s.visible:
-                packet["visible"].append(1)
+                packet["visible"].append(True)
             elif not s.visible:
-                packet["visible"].append(0)
+                packet["visible"].append(False)
         
         return packet
 
 
+    def check_move(self, selection_index: str):
+        
+        # Convert index to int and access squares dict
+        square = self.squares[self.index_to_coords(int(selection_index))]
+        
+        # Hit mine; game over
+        if square.mine:
+            self.lose = True
+            self.blow_up = square
 
+            # Game over; freeze time
+            self.score = self.get_game_time()
+
+        # Hit a number
+        elif square.adj > 0: 
+            square.visible = True
+
+        # Hit empty space; check to reveal additional spaces
+        else:
+            square.visible = True
+            square.get_adjacent_recursive(self)
 
 # state = State()
 # state.create_board(difficulty="easy", fixed_mines=True)

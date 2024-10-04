@@ -37,7 +37,13 @@ def minesweeper():
     
     if fl.request.method == "POST":
         print(fl.request.form)
-    
+        square_idx = fl.request.form.get("square")
+
+        if square_idx:
+            mstate.check_move(square_idx)
+
+            # Return to client indices of newly visible squares
+            
         # flask requires a return value; 204 status will keep browser on current page
         return ("", 204)
 
