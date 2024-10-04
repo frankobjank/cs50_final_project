@@ -44,7 +44,10 @@ def minesweeper():
 
     else:
 
-        squares = mstate.squares
-        # squares_JSON = fl.jsonify(mstate.squares)
-        one_square = squares[(0, 0)]
-        return fl.render_template("minesweeper.html", squares=mstate.squares, width=mstate.width, height=mstate.height, one_square=one_square)
+        squares_JSON = fl.jsonify([s.serialize() for s in mstate.squares.values()])
+        print(squares_JSON.get_json())
+        return fl.render_template("minesweeper.html", squares=squares_JSON, width=mstate.width, height=mstate.height)
+    
+
+# template for button once things are established
+# <!-- <button onclick="checkSquare()" class="square" name="b" id="{{ }}"></button> -->

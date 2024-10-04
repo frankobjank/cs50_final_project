@@ -9,7 +9,6 @@ class Square:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.point = Point(x, y)
         self.adj = 0 # adj to mines number
         self.mine = False
         self.flag = False
@@ -20,6 +19,16 @@ class Square:
     def __repr__(self):
         return f"Square at ({self.x}, {self.y}), mine = {self.mine}, adj = {self.adj}"
     
+
+    def serialize(self):     
+        # Can get x, y from index.
+        # Only need to send adj, flag, vis
+        
+        return {
+            "adj": self.adj,
+            "flag": self.flag,
+            "visible": self.visible
+        }
 
     # get number of adjacent mines but not mines themselves. Make sure it's in range i.e. .get()
     def get_adjacent_to_mines(self, state):
@@ -116,16 +125,15 @@ class State:
         # set dimensions based on difficulty
         self.set_difficulty(difficulty)
 
-        # create all squares
+        # create all squares - dict
         self.squares = {(x, y): Square(x, y) for y in range(self.height) for x in range(self.width)}
 
         # fixed_mines mines for debugging
         if fixed_mines == True:
             self.mines = set(
                 self.squares[(mine_coord)] for mine_coord in [
-                    (1, 2), (6, 4), (2, 3), (0, 5), (7, 5), (3, 6), (7, 6), (0, 7), (2, 7), (2, 9)
-                ]
-            )
+                    (1, 2), (6, 4), (2, 3), (0, 5), (7, 5),
+                    (3, 6), (7, 6), (0, 7), (2, 7), (2, 9)])
 
             for mine in self.mines:
                 self.squares[(mine.x, mine.y)].mine = True
@@ -153,6 +161,24 @@ class State:
 
     def get_random_coords(self):
         return Point(random.randrange(self.width), random.randrange(self.height))
+
+
+    def build_packet(self):
+        # Only need to return adj, list of indices of flags; visible squares
+        packet = {"adj": [], "flags": [], "visible": []}
+
+        for s in self.squares.values():
+            packet["adj"].append(s.adj)
+            
+            if s.flag:
+                packet["flags"].append(1)
+            elif not s.flag:
+                packet["flags"].append(0)
+
+            if s.visible:
+                packet["flags"].append(1)
+
+
 
 
 # state = State()
