@@ -166,7 +166,7 @@ class State:
 
     def build_packet(self):
         # Only need to return adj, list of indices of flags; visible squares
-        packet = {"adj": [], "flags": [], "visible": []}
+        packet = {"width": self.width, "height": self.height, "adj": [], "flags": [], "visible": []}
 
         for s in self.squares.values():
             packet["adj"].append(s.adj)

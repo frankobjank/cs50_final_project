@@ -43,11 +43,10 @@ def minesweeper():
 
     else:
 
-        squares = fl.jsonify(mstate.build_packet())
-        
-        print(squares.get_json())
+        # Send to client as a dict
+        data = mstate.build_packet()
 
-        return fl.render_template("minesweeper.html", squares = squares, width = mstate.width, height = mstate.height)
+        return fl.render_template("minesweeper.html", data = data)
     
 
 # template for button once things are established

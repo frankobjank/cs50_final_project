@@ -5,10 +5,13 @@
 {% endblock %}
 
 {% block main %}
-    <!-- Embedding Flask Data into a <script> tag as a JSON object -->
-
-    <!-- Javascript for displaying table -->
-    <script src="/static/minesweeper.js"></script>
+    <!-- Receive data as dict; transform into JSON -->
+    <script type="text/javascript">
+        const board = {{ data|tojson }};
+    </script>
+    
+    <!-- Javascript for building table and handling input -->
+    <script type="text/javascript" src="/static/minesweeper.js"></script>
 
     <div id="table-container"></div>
 

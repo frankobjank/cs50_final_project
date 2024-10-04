@@ -1,13 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(squares)
-    let board = {
-        'adj': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 1, 1, 1, 0, 0, 1, 2, 1, 1, 0, 1, 0, 2, 1, 0, 0, 1, 1, 1, 1, 1, 3, 0, 2, 0, 2, 3, 2, 0, 1, 0, 2, 0, 2, 0, 0, 2, 0, 2, 1, 0, 1, 1, 1, 0, 1, 3, 2, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0], 
-        'flags': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        'visible': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    }
+    console.log("board = " + board.width);
     
     // Insert the table into the DOM
-    document.getElementById('table-container').appendChild(createTable(10, 10, board));
+    document.getElementById('table-container').appendChild(createTable(board));
 
 })
 
@@ -30,21 +25,21 @@ function success(){
 }
 
 
-function createTable(width, height, squares) {
+function createTable(board) {
     // Create table element
     const table = document.createElement('table');
 
     // Create tbody and generate table rows
     const tbody = document.createElement('tbody');
-    for (let y = 0; y < height; y++) {
+    for (let y = 0; y < board.height; y++) {
         const tr = document.createElement('tr');
 
         // Create table data cells for each column in this row
-        for (let x = 0; x < width; x++) {
+        for (let x = 0; x < board.width; x++) {
             const td = document.createElement('td');
-            let index = y * height + x;
+            let index = y * board.height + x;
 
-            let value = squares.adj[index];
+            let value = board.adj[index];
 
             td.textContent = value;
             tr.appendChild(td);
