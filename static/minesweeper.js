@@ -2,38 +2,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Insert the table into the DOM
     document.getElementById('board-container').appendChild(createBoard(serverBoard));
-
-    // Render board
-
-})
+});
 
 
-function checkServer(index) {
+function serverRequest(index) {
     $.ajax({
         dataType: 'json',
         type: 'POST',
         url: 'minesweeper',
         data: {'square': index},
         success: success
-    })    
+    });
 }
 
 
-function success(){
-    console.log("Completed POST request")
+// Handle the success response from Flask
+function success(response) {
+    
+    // Updates board if there is there is visible or mines data
+    if (response.visible || response.mines) {
+        updateBoard(response)
+    }
 }
 
 
 function createBoard(serverBoard) {
     
-    // Initialize array of flags - bools
-    flags = Array(serverBoard.width * serverBoard.height);
-    
-    // Initialize array of squares - <td><button>
-    squares = Array(serverBoard.width * serverBoard.height);
+    isGameOver()
     
     // Create table element for board
     const table = document.createElement('table');
+    table.className = 'board-table';
 
     // Create table body
     const tbody = document.createElement('tbody');
@@ -46,27 +45,27 @@ function createBoard(serverBoard) {
         // Create table data cells
         for (let x = 0; x < serverBoard.width; x++) {
             const td = document.createElement('td');
-            let index = y * serverBoard.height + x;
-            
-            // Set flag initial value to false
-            flags[index] = false
 
+            // Calculate index from of (x, y) coordinates
+            let index = y * serverBoard.height + x;
+
+            // Create button
             let b = document.createElement('button')
-            squares[index] = b
             
+            // Assign attributes to button
             b.className = 'square';
             b.name = index;
             b.id = index;
 
-            // Add EventListener to button
-            b.addEventListener("mouseup", (event) => {
+            // Add EventListeners to button
+            b.addEventListener("mousedown", (event) => {
                 
                 // Left mouse click
                 if (event.button === 0) {
                     
                     // Send button id to server if not flag
-                    if (!(flags[b.id])) {
-                        checkServer(b.id);
+                    if ((b.getAttribute('data-flag')) === null) {
+                        serverRequest(b.id);
                     }
                 }
                 
@@ -77,60 +76,28 @@ function createBoard(serverBoard) {
                     event.preventDefault();
                     
                     // Toggle flag on/off
-                    if (flags[index]) {
-                        b.textContent = '0';
-                        flags[index] = false;
-                    }
-                    else {
-                        flags[index] = true;
-                        b.textContent = 'f';
-                    }
+                    b.toggleAttribute('data-flag')
                 }
             });
             
-            // Grab focus on hover
+            // Grab focus on hover - BUG: this keeps focus even after mouse leaves square
             b.addEventListener("mousemove", (event) => {
                 b.focus();
             });
 
             // TEMP FIX FOR RIGHT CLICK ISSUE - USE KEY 'F' INSTEAD
             b.addEventListener("keydown", (event) => {
-                
+
                 // Press 'F' for right click
                 if (event.code === "KeyF") {
 
                     // Toggle flag on/off
-                    if (flags[index]) {
-                        flags[index] = false;
-                        b.textContent = '';
-                    }
-                    else {
-                        flags[index] = true;
-                        b.textContent = 'f';
-                    }
+                    b.toggleAttribute('data-flag')
                 }
             });
 
-            // // Set 'onclick' -- this may be redundant due to 'addEventListener' above
+            /* Set 'onclick' -- this is redundant due to 'addEventListener' above */
             // button.setAttribute("onclick", `checkServer(${button.id})`);
-            
-
-            // SPLIT INTO RENDER BOARD
-            // If square has been clicked
-            if (serverBoard.visible[index]) {
-                
-                // Darken square
-                b.style.backgroundColor = 'gray';
-
-                // Display adj number if > 0
-                if (serverBoard.adj[index] > 0) {
-                    b.textContent = serverBoard.adj[index];
-                }
-            }
-
-            if (flags[index] === true) {
-                b.textContent = 'f';
-            }
             
             td.appendChild(b);
             tr.appendChild(td);
@@ -141,4 +108,50 @@ function createBoard(serverBoard) {
     table.appendChild(tbody);
 
     return table;
+}
+
+
+function updateBoard(response) {
+
+    // Reveal if visible is not empty
+    if (response.visible.length > 0) {
+
+        // List of indices of visible squares
+        for (let i = 0; i < response.visible.length; i++) {
+
+            let b = document.getElementById(response.visible[i]);
+            
+            // Continue if flag
+            if (b.getAttribute('data-flag') !== null) {
+                continue;
+            }
+
+            // Square should be visible; disable the button
+            b.disabled = true;
+
+            // Display number in square
+            let adj = response.adj[i];
+
+            if (adj > 0) {
+                b.textContent = adj;
+            }
+        }
+    }
+
+    if (response.mines.length > 0) {
+
+        // List of indices of mines
+        for (sq_index of response.mines) {
+            let b = document.getElementById(sq_index);
+            
+            b.setAttribute('data-mine', true);
+        }
+    }
+}
+
+
+function isGameOver() {
+    if (document.querySelector('data-mine')) {
+        alert('game is over');
+    }
 }

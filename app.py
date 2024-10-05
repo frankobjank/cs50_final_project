@@ -31,28 +31,37 @@ def index():
 @app.route("/minesweeper", methods=["GET", "POST"])
 def minesweeper():
 
-    # Create board calling minesweeper
-    mstate = ms.State()
-    mstate.create_board(difficulty="easy", fixed_mines=True)
-    
-    if fl.request.method == "POST":
-        print(fl.request.form)
-        square_idx = fl.request.form.get("square")
-
-        if square_idx:
-            mstate.check_move(square_idx)
-
-            # Return to client indices of newly visible squares
-            
-        # flask requires a return value; 204 status will keep browser on current page
-        return ("", 204)
-
-    else:
-
+    # GET - create board and send
+    if fl.request.method == "GET":
+        # Create board calling minesweeper
+        mstate = ms.State()
+        mstate.create_board(difficulty="easy", fixed_mines=True)
+        
         # Send to client as a dict
-        data = mstate.build_packet()
+        data = mstate.setup_packet()
 
         return fl.render_template("minesweeper.html", data = data)
+
+    # POST - receive requests and update board
+    elif fl.request.method == "POST":
+        print(f"request: {fl.request.form}")
+
+        # Square index from client
+        square_idx = fl.request.form.get("square")
+
+        # Only return data if game not over
+        if square_idx and not mstate.game_over:
+            mstate.update_server(square_idx)
+            
+            # Return to mines or visible squares to client
+            response = mstate.update_packet()
+
+            print(f"returning: {response}")
+            
+            return response
+
+        # flask requires a return value; 204 status will keep browser on current page
+        return ("", 204)
     
 
 # template for button once things are established

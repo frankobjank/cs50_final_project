@@ -5,8 +5,9 @@
 {% endblock %}
 
 {% block main %}
-    <!-- Receive data as dict; transform into JSON -->
+    
     <script type="text/javascript">
+        /* Receive data as dict; transform into JSON */
         const serverBoard = {{ data|tojson }};
     </script>
     

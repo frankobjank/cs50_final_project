@@ -16,6 +16,22 @@ h1 {
     outline: 0;
 }
 
+.square[data-flag] {
+    background-color: purple;
+}
+
+.square[data-mine] {
+    background-color: red;
+}
+
+.square:disabled {
+    background-color: rgb(184, 183, 183);
+}
+
+.square {
+    color: #000000;
+}
+
 #board-container {
     display: flex;
     justify-content: center;  /* Center horizontally */

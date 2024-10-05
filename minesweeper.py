@@ -69,7 +69,7 @@ class State:
         self.mines_remaining = 0
         self.selection = None
         self.win = False
-        self.lose = False
+        self.game_over = False
         self.reset = False
         self.start_clock = False
         self.start_time = time.time()
@@ -87,7 +87,7 @@ class State:
         return self.num_mines - len(self.flags)
     
 
-    def coord_to_index(self, coords: tuple) -> int:
+    def coords_to_index(self, coords: tuple) -> int:
         # validate
         if len(coords) != 2:
             print("Tuple must have 2 items.")
@@ -135,7 +135,8 @@ class State:
             self.mines = set(
                 self.squares[(mine_coord)] for mine_coord in [
                     (1, 2), (6, 4), (2, 3), (0, 5), (7, 5),
-                    (3, 6), (7, 6), (0, 7), (2, 7), (2, 9)])
+                    (3, 6), (7, 6), (0, 7), (2, 7), (2, 9)
+                ])
 
             for mine in self.mines:
                 self.squares[(mine.x, mine.y)].mine = True
@@ -165,29 +166,19 @@ class State:
         return Point(random.randrange(self.width), random.randrange(self.height))
 
 
-    def build_packet(self):
-        # Only need to return adj; visible squares. Flags can be handled by client
-        packet = {"width": self.width, "height": self.height, "adj": [], "visible": []}
-
-        for s in self.squares.values():
-            packet["adj"].append(s.adj)
-
-            if s.visible:
-                packet["visible"].append(True)
-            elif not s.visible:
-                packet["visible"].append(False)
-        
-        return packet
+    def setup_packet(self):
+        # Only need dimensions; keep mines and adj info hidden on server side
+        return {"width": self.width, "height": self.height}
 
 
-    def check_move(self, selection_index: str):
+    def update_server(self, selection_index: str):
         
         # Convert index to int and access squares dict
         square = self.squares[self.index_to_coords(int(selection_index))]
         
         # Hit mine; game over
         if square.mine:
-            self.lose = True
+            self.game_over = True
             self.blow_up = square
 
             # Game over; freeze time
@@ -201,6 +192,24 @@ class State:
         else:
             square.visible = True
             square.get_adjacent_recursive(self)
+
+
+    def update_packet(self):
+        # Reveal adj, vis, mines as needed
+        packet = {"adj": [], "visible": [], "mines": []}
+        
+        if self.game_over:
+            packet["mines"] = [self.coords_to_index((m.x, m.y)) for m in self.mines]
+
+        # Append index of visible square and adj value corresponding with that square
+        for s in self.squares.values():
+            if s.visible:
+                packet["adj"].append(s.adj)
+                packet["visible"].append(self.coords_to_index((s.x, s.y)))
+        
+        assert len(packet["adj"]) == len(packet["visible"]), "len of adj and visible should match"
+            
+        return packet
 
 # state = State()
 # state.create_board(difficulty="easy", fixed_mines=True)
