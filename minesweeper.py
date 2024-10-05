@@ -133,8 +133,7 @@ class State:
             self.mines = set(
                 self.squares[(mine_coord)] for mine_coord in [
                     (1, 2), (6, 4), (2, 3), (0, 5), (7, 5),
-                    (3, 6), (7, 6), (0, 7), (2, 7), (2, 9)
-                ])
+                    (3, 6), (7, 6), (0, 7), (2, 7), (2, 9)])
 
             for mine in self.mines:
                 self.squares[(mine.x, mine.y)].mine = True
@@ -156,8 +155,6 @@ class State:
                     self.adjacent_to_mines.add(sq)
                 else:
                     empty_squares.append(sq)
-
-        self.mines_remaining = self.get_mines_remaining()
 
 
     def get_random_coords(self):

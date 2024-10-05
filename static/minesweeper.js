@@ -5,12 +5,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-function serverRequest(index) {
+function serverRequest(input) {
+
+    // Initialize data with nulls
+    let data = {'square': null, 'reset': null};
+
+    // If input is 'reset'
+    if (input === 'reset') {
+        data.reset = true;
+    }
+
+    // If input is a number
+    else if (!isNaN(input)) {
+        data.square = input;
+    }
+
+    // Send data via jQuery ajax function
     $.ajax({
         dataType: 'json',
         type: 'POST',
         url: 'minesweeper',
-        data: {'square': index},
+        data: data,
         success: success
     });
 }
@@ -39,8 +54,49 @@ function createBoard(serverBoard) {
 
     // Create table head for timer, mines remaining, controls
     const thead = document.createElement('thead');
-    thead.className = 'panel';
+    thead.className = 'panel-container';
+    
+    // Create panel
+    
+    // Timer
+    
+    const thTimer = document.createElement('th');
+    
+    // Set items in header to span more than one col
+    thTimer.colSpan="3"
+    
+    thTimer.className = 'timer';
+    thTimer.id, thTimer.name = 'timer';
+    thTimer.innerHTML = 'timer';
+    
+    thead.appendChild(thTimer);
+    
+    // Reset button
+    const thReset = document.createElement('th');
+    
+    // Set items in header to span more than one col
+    thReset.colSpan="3"
+    
+    let b = document.createElement('button');
+    b.className = 'btn btn-outline-danger btn-block panel-button';
+    b.id, b.name = 'reset';
+    b.innerHTML = '<h2>Reset</h2>';
 
+    // Add event listener; setting 'onclick' was activating on page load
+    b.addEventListener('mouseup', (event) => {
+
+        if (event.button === 0) {
+
+            // Quick way to reset - literally refresh the page
+            window.location.reload();
+        }
+    });
+    
+    // Add child elements to th, thead, table
+    thReset.appendChild(b);
+    thead.appendChild(thReset);
+    table.appendChild(thead);
+    
     // Create table body for buttons
     const tbody = document.createElement('tbody');
 
@@ -66,7 +122,7 @@ function createBoard(serverBoard) {
 
             // Add EventListeners to button
             b.addEventListener("mousedown", (event) => {
-                if (isGameOver() !== null) {
+                if (isGameOver()) {
                     alert('game is over');
                 }
                 // Left mouse click
@@ -106,7 +162,7 @@ function createBoard(serverBoard) {
             });
 
             /* Set 'onclick' -- this is redundant due to 'addEventListener' above */
-            // button.setAttribute("onclick", `checkServer(${button.id})`);
+            // button.setAttribute('onclick', `serverRequest(${button.id})`);
             
             td.appendChild(b);
             tr.appendChild(td);

@@ -11,24 +11,33 @@ h1 {
     font-weight: bold;
 }
 
+.panel-container {
+    /* Doesn't seem to do anything at the moment */
+    text-align: center;
+}
+
 /* Remove blue outline for minesweeper squares */
 .square:focus{
     outline: 0;
 }
 
+/* Flags are purple */
 .square[data-flag] {
     background-color: purple;
 }
 
+/* Mines are red */
 .square[data-mine] {
     background-color: red;
 }
 
+/* Color of visible squares */
 .square:disabled {
     background-color: rgb(184, 183, 183);
 }
 
 .square {
+    /* Color of text inside square buttons */
     color: #000000;
 }
 
@@ -45,11 +54,23 @@ tr, td {
     width: 1rem;
 }
 
-button {
+.square {
     height: 2.5rem;
     width: 2.5rem;
 }
 
+th {
+    align-content: center;
+    align-items: center;
+}
+
+.panel-button {
+    width: 100%;
+    align-content: center;
+    margin-bottom: 1rem;
+}
+
+/* ctr = container */
 .ctr-custom {
     display: flex;
     flex-wrap: wrap;  /* Allow items to wrap onto the next line */
@@ -89,14 +110,3 @@ button {
     text-decoration: none;
     vertical-align: middle;
 }
-
-/* removing footer for now
-footer {
-    background-color: #121111;
-    color: #ffffff;
-    text-align: center;
-    height: 50px;
-    width: 80%;            
-    margin-bottom: 0;
-}
-*/
