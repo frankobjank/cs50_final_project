@@ -18,23 +18,30 @@ function serverRequest(index) {
 
 // Handle the success response from Flask
 function success(response) {
-    
+
+    // Catch if response is undefined
+    if (response === undefined) {
+        return;
+    }
+
     // Updates board if there is there is visible or mines data
     if (response.visible || response.mines) {
-        updateBoard(response)
+        updateBoard(response);
     }
 }
 
 
 function createBoard(serverBoard) {
     
-    isGameOver()
-    
     // Create table element for board
     const table = document.createElement('table');
     table.className = 'board-table';
 
-    // Create table body
+    // Create table head for timer, mines remaining, controls
+    const thead = document.createElement('thead');
+    thead.className = 'panel';
+
+    // Create table body for buttons
     const tbody = document.createElement('tbody');
 
     for (let y = 0; y < serverBoard.height; y++) {
@@ -59,7 +66,9 @@ function createBoard(serverBoard) {
 
             // Add EventListeners to button
             b.addEventListener("mousedown", (event) => {
-                
+                if (isGameOver() !== null) {
+                    alert('game is over');
+                }
                 // Left mouse click
                 if (event.button === 0) {
                     
@@ -151,7 +160,5 @@ function updateBoard(response) {
 
 
 function isGameOver() {
-    if (document.querySelector('data-mine')) {
-        alert('game is over');
-    }
+    return document.querySelector('data-mine')
 }

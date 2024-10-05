@@ -12,9 +12,7 @@ class Square:
         self.y = y
         self.adj = 0 # adj to mines number
         self.mine = False
-        self.flag = False
         self.visible = False
-        self.blow_up = False
 
 
     def __repr__(self):
@@ -31,12 +29,17 @@ class Square:
     
 
     def get_adjacent_recursive(self, state):
+
+        # Double for-loop to get all adjacent squares
         for dy in [-1, 0, 1]:
             for dx in [-1, 0, 1]:
                 adj = state.squares.get((self.x+dx, self.y+dy), None)
                 if adj is not None and adj != self and not adj.visible:
                     adj.visible = True
-                    if adj.adj == 0: # if adj is empty, run again
+                    state.visible.add(adj)
+                    
+                    # If adj is empty, run again
+                    if adj.adj == 0: 
                         adj.get_adjacent_recursive(state)
 
 
@@ -54,37 +57,32 @@ class Square:
 class State:
     def __init__(self):
         
+        # Board Elements
         self.width = 0
         self.height = 0
         self.num_mines = 0
 
+        # Board Collections
         self.squares = {}
-
-        # board elements
         self.mines = set()
         self.adjacent_to_mines = set()
-        self.empty_squares_paths = set()
+        self.visible = set()
 
-        self.flags = set()
-        self.mines_remaining = 0
-        self.selection = None
+        # Win/Lose
         self.win = False
         self.game_over = False
         self.reset = False
+        self.blow_up = None
+
+        # Timing
         self.start_clock = False
         self.start_time = time.time()
         self.game_time = 0
         self.score = 0
-
-        self.blow_up = None
     
 
     def get_game_time(self):
         return time.time() - self.start_time
-    
-
-    def get_mines_remaining(self) -> int:
-        return self.num_mines - len(self.flags)
     
 
     def coords_to_index(self, coords: tuple) -> int:
@@ -187,11 +185,18 @@ class State:
         # Hit a number
         elif square.adj > 0: 
             square.visible = True
+            self.visible.add(square)
 
         # Hit empty space; check to reveal additional spaces
         else:
             square.visible = True
+            self.visible.add(square)
             square.get_adjacent_recursive(self)
+        
+        if self.check_for_win():
+            self.win = True
+            self.game_over = True
+            self.score = self.get_game_time()
 
 
     def update_packet(self):
@@ -210,6 +215,13 @@ class State:
         assert len(packet["adj"]) == len(packet["visible"]), "len of adj and visible should match"
             
         return packet
+
+
+    def check_for_win(self):
+
+        # Check if all non-mine squares are visible
+        return len(self.visible) == (self.width * self.height) - len(self.mines)
+
 
 # state = State()
 # state.create_board(difficulty="easy", fixed_mines=True)

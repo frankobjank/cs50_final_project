@@ -33,18 +33,16 @@ def minesweeper():
 
     # GET - create board and send
     if fl.request.method == "GET":
-        # Create board calling minesweeper
-        mstate = ms.State()
-        
-        # Add mstate to the flask session to sustain between GET/POST calls
-        fl.session["mstate"] = mstate
 
-        mstate.create_board(difficulty="easy", fixed_mines=True)
         
-        # Send to client as a dict
-        data = mstate.setup_packet()
+        # Create new minesweeper State object
+        # Add to flask session to sustain between GET/POST calls
+        fl.session["mstate"] = ms.State()
 
-        return fl.render_template("minesweeper.html", data = data)
+        fl.session["mstate"].create_board(difficulty="easy", fixed_mines=True)
+        
+        # Send to client as a dict = data
+        return fl.render_template("minesweeper.html", data = fl.session["mstate"].setup_packet())
 
     # POST - receive requests and update board
     elif fl.request.method == "POST":
