@@ -35,6 +35,10 @@ def minesweeper():
     if fl.request.method == "GET":
         # Create board calling minesweeper
         mstate = ms.State()
+        
+        # Add mstate to the flask session to sustain between GET/POST calls
+        fl.session["mstate"] = mstate
+
         mstate.create_board(difficulty="easy", fixed_mines=True)
         
         # Send to client as a dict
@@ -45,6 +49,9 @@ def minesweeper():
     # POST - receive requests and update board
     elif fl.request.method == "POST":
         print(f"request: {fl.request.form}")
+
+        # Retrieve mstate from session
+        mstate = fl.session.get("mstate")
 
         # Square index from client
         square_idx = fl.request.form.get("square")
