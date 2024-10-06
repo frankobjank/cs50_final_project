@@ -68,19 +68,19 @@ function createBoard(serverBoard) {
     thead.className = 'panel-container';
     
     // Create panel
-    
-    // Timer
-    const thTimer = document.createElement('th');
-    
+
+    // Mines Remaining
+    const thMines = document.createElement('th');
+
     // Set items in header to span more than one col
-    thTimer.colSpan="4"
+    thMines.colSpan="4"
     
-    thTimer.className = 'timer';
-    thTimer.id = 'timer';
-    thTimer.innerText = '00:00'
+    thMines.className = 'minesRemaining';
+    thMines.id = 'minesRemaining';
+    thMines.innerText = numMines
 
     // Add th to thead
-    thead.appendChild(thTimer);
+    thead.appendChild(thMines);
     
     // Reset button
     const thReset = document.createElement('th');
@@ -96,35 +96,31 @@ function createBoard(serverBoard) {
     // Add event listener; setting 'onclick' was activating on page load
     b.addEventListener('mouseup', (event) => {
         
-        if (event.button === 0) {
-            
+        if (event.button === 0) {            
             // Quick way to reset - literally refresh the page
             window.location.reload();
         }
     });
 
-    // Add button to th
+    // Add button to th; th to thead
     thReset.appendChild(b);
-
-    // Add th to thead
     thead.appendChild(thReset);
     
-    // Mines Remaining
-    const thMines = document.createElement('th');
+    // Timer
+    const thTimer = document.createElement('th');
     
     // Set items in header to span more than one col
-    thMines.colSpan="4"
+    thTimer.colSpan="4"
     
-    thMines.className = 'minesRemaining';
-    thMines.id = 'minesRemaining';
-    thMines.innerText = `Mines left: ${numMines}`
+    thTimer.className = 'timer';
+    thTimer.id = 'timer';
+    thTimer.innerText = '000'
 
     // Add th to thead
-    thead.appendChild(thMines);
-    
+    thead.appendChild(thTimer);
+
     // Add thead to table
     table.appendChild(thead);
-    
     
     // Create table body for buttons
     const tbody = document.createElement('tbody');
@@ -205,7 +201,6 @@ function createBoard(serverBoard) {
                     // Add to panel
                     thMines.innerText = `Mines left: ${minesRemaining}`;
                 }
-        
             });
             
             // Grab focus on hover - BUG: this keeps focus even after mouse leaves square
@@ -286,6 +281,7 @@ function updateBoard(response) {
             
             // Reveal mine if it was not flagged
             if (b.getAttribute('data-flagged') === null) {
+                
                 // Set mine attribute
                 b.toggleAttribute('data-mine');
                 b.innerText = '*';
@@ -307,7 +303,13 @@ function updateBoard(response) {
     
     // Game over; win
     else if (response.win) {
+        
         // Change reset text
         document.querySelector('#reset').textContent = 'WIN!'
     }
+}
+
+
+function padNumbers(num) {
+    return `${Math.floor(num / 100)}${Math.floor(num / 10)}`
 }
