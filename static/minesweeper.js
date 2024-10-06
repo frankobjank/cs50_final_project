@@ -308,6 +308,6 @@ function updateBoard(response) {
     // Game over; win
     else if (response.win) {
         // Change reset text
-        document.querySelector('#reset').textContent = 'YOU WIN!'
+        document.querySelector('#reset').textContent = 'WIN!'
     }
 }

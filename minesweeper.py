@@ -71,6 +71,7 @@ class State:
         # Win/Lose
         self.win = False
         self.lose = False
+        self.game_over = False
         self.reset = False
         self.blow_up = None
 
@@ -174,6 +175,7 @@ class State:
         # Hit mine; game over
         if square.mine:
             self.lose = True
+            self.game_over = True
             self.blow_up = square
 
             # Game over; freeze time
@@ -192,11 +194,12 @@ class State:
         
         if self.check_for_win():
             self.win = True
+            self.game_over = True
 
 
     def update_packet(self):
         # Reveal adj, vis, mines as needed
-        packet = {"adj": [], "visible": [], "mines": [], "win": False}
+        packet = {"adj": [], "visible": [], "mines": [], "win": self.win}
         
         if self.lose:
             packet["mines"] = [self.coords_to_index((m.x, m.y)) for m in self.mines]
