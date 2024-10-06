@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // Keep track if game has started for timer
+    hasStarted = false;
+    gameOver = false;
 
     // Insert the table into the DOM
     document.getElementById('board-container').appendChild(createBoard(serverBoard));
@@ -43,11 +47,18 @@ function success(response) {
     if (response.visible || response.mines) {
         updateBoard(response);
     }
+
+    // Set gameOver to true if mines are included in response
+    if (response.mines.length > 0 || response.win) {
+        gameOver = true;
+    }
 }
 
 
 function createBoard(serverBoard) {
-    
+
+    const numMines = serverBoard.num_mines;
+
     // Create table element for board
     const table = document.createElement('table');
     table.className = 'board-table';
@@ -59,43 +70,61 @@ function createBoard(serverBoard) {
     // Create panel
     
     // Timer
-    
     const thTimer = document.createElement('th');
     
     // Set items in header to span more than one col
-    thTimer.colSpan="3"
+    thTimer.colSpan="4"
     
     thTimer.className = 'timer';
-    thTimer.id, thTimer.name = 'timer';
-    thTimer.innerHTML = 'timer';
-    
+    thTimer.id = 'timer';
+    thTimer.innerText = '00:00'
+
+    // Add th to thead
     thead.appendChild(thTimer);
     
     // Reset button
     const thReset = document.createElement('th');
     
     // Set items in header to span more than one col
-    thReset.colSpan="3"
+    thReset.colSpan="2"
     
     let b = document.createElement('button');
     b.className = 'btn btn-outline-danger btn-block panel-button';
-    b.id, b.name = 'reset';
-    b.innerHTML = '<h2>Reset</h2>';
-
+    b.id = 'reset';
+    b.innerText = 'Reset';
+    
     // Add event listener; setting 'onclick' was activating on page load
     b.addEventListener('mouseup', (event) => {
-
+        
         if (event.button === 0) {
-
+            
             // Quick way to reset - literally refresh the page
             window.location.reload();
         }
     });
-    
-    // Add child elements to th, thead, table
+
+    // Add button to th
     thReset.appendChild(b);
+
+    // Add th to thead
     thead.appendChild(thReset);
+    
+    // Mines Remaining
+    const thMines = document.createElement('th');
+    
+    // Set items in header to span more than one col
+    thMines.colSpan="4"
+    
+    thMines.className = 'minesRemaining';
+    thMines.id = 'minesRemaining';
+    thMines.innerText = `Mines left: ${numMines}`
+
+    // Add th to thead
+    thead.appendChild(thMines);
+    
+    // Add thead to table
     table.appendChild(thead);
+    
     
     // Create table body for buttons
     const tbody = document.createElement('tbody');
@@ -122,27 +151,61 @@ function createBoard(serverBoard) {
 
             // Add EventListeners to button
             b.addEventListener("mousedown", (event) => {
-                if (isGameOver()) {
-                    alert('game is over');
+                
+                if (!hasStarted) {
+                    hasStarted = true;
+                    
+                    // Start the timer
+                    let count = 0;
+                    let intervalId = setInterval(() => {
+                        count++;
+                        
+                        // Stop timer if game over and exit early
+                        if (gameOver) {
+                            clearInterval(intervalId);
+                            return;
+                        }
+
+                        // Get minutes and seconds
+                        let minutes = Math.floor(count / 60);
+                        let seconds = count % 60;
+
+                        // Split minutes and seconds into digits to add leading zeroes
+                        thTimer.innerHTML = `${Math.floor(minutes / 10)}${minutes % 10}:${Math.floor(seconds / 10)}${seconds % 10}`;
+
+                    }, 1000);
                 }
+
                 // Left mouse click
-                if (event.button === 0) {
+                if (event.button === 0 && !gameOver) {
                     
                     // Send button id to server if not flag
-                    if ((b.getAttribute('data-flag')) === null) {
+                    if (b.getAttribute('data-flagged') === null) {
                         serverRequest(b.id);
                     }
                 }
                 
                 // Right mouse click
-                else if (event.button === 2) {
+                else if (event.button === 2 && !gameOver) {
 
                     // SUPPOSED TO PREVENT CONTEXT MENU APPEARING; NOT WORKING
                     event.preventDefault();
                     
-                    // Toggle flag on/off
-                    b.toggleAttribute('data-flag')
+                    // Toggle flag true/false
+                    b.toggleAttribute('data-flagged');
+
+                    // Calc mines - flags for Remaining Mines value
+                    let minesRemaining = numMines - document.querySelectorAll('.square[data-flagged]').length;
+
+                    // Set to 0 if below 0
+                    if (0 > minesRemaining) {
+                        minesRemaining = 0;
+                    }
+                    
+                    // Add to panel
+                    thMines.innerText = `Mines left: ${minesRemaining}`;
                 }
+        
             });
             
             // Grab focus on hover - BUG: this keeps focus even after mouse leaves square
@@ -156,8 +219,19 @@ function createBoard(serverBoard) {
                 // Press 'F' for right click
                 if (event.code === "KeyF") {
 
-                    // Toggle flag on/off
-                    b.toggleAttribute('data-flag')
+                    // Toggle flag true/false
+                    b.toggleAttribute('data-flagged');
+
+                    // Calc mines - flags for Remaining Mines value
+                    let minesRemaining = numMines - document.querySelectorAll('.square[data-flagged]').length;
+                    
+                    // Set to 0 if below 0
+                    if (0 > minesRemaining) {
+                        minesRemaining = 0;
+                    }
+                    
+                    // Add to panel
+                    thMines.innerText = `Mines left: ${minesRemaining}`;
                 }
             });
 
@@ -186,8 +260,8 @@ function updateBoard(response) {
 
             let b = document.getElementById(response.visible[i]);
             
-            // Continue if flag
-            if (b.getAttribute('data-flag') !== null) {
+            // Pass without revealing if flag
+            if (b.getAttribute('data-flagged') !== null) {
                 continue;
             }
 
@@ -203,18 +277,37 @@ function updateBoard(response) {
         }
     }
 
+    // Game over; lose
     if (response.mines.length > 0) {
-
+        
         // List of indices of mines
-        for (sq_index of response.mines) {
-            let b = document.getElementById(sq_index);
+        for (sqIndex of response.mines) {
+            let b = document.getElementById(sqIndex);
             
-            b.setAttribute('data-mine', true);
+            // Reveal mine if it was not flagged
+            if (b.getAttribute('data-flagged') === null) {
+                // Set mine attribute
+                b.toggleAttribute('data-mine');
+                b.innerText = '*';
+            }
         }
+
+        // Check if any squares were wrongly flagged
+        document.querySelectorAll('.square[data-flagged]').forEach((b) => {
+            
+            // b is not a mine
+            if (b.getAttribute('data-mine') === null) {
+                b.toggleAttribute('data-false-flag');
+            }
+        });
+
+        // Change reset text
+        document.querySelector('#reset').textContent = 'LOSE'
     }
-}
-
-
-function isGameOver() {
-    return document.querySelector('data-mine')
+    
+    // Game over; win
+    else if (response.win) {
+        // Change reset text
+        document.querySelector('#reset').textContent = 'YOU WIN!'
+    }
 }

@@ -12,8 +12,18 @@ h1 {
 }
 
 .panel-container {
-    /* Doesn't seem to do anything at the moment */
-    text-align: center;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+#timer {
+    padding-bottom: .5rem;
+    font-size: 1.5rem;
+}
+
+#minesRemaining {
+    padding-bottom: .5rem;
+    font-size: 1rem;
 }
 
 /* Remove blue outline for minesweeper squares */
@@ -22,13 +32,20 @@ h1 {
 }
 
 /* Flags are purple */
-.square[data-flag] {
+.square[data-flagged] {
     background-color: purple;
 }
 
 /* Mines are red */
 .square[data-mine] {
     background-color: red;
+    font-size: 2rem;
+    font-weight:800;
+}
+
+/* Wrongly flagged squares get strikethrough */
+.square[data-false-flag] {
+    text-decoration-line: line-through;
 }
 
 /* Color of visible squares */
@@ -43,8 +60,12 @@ h1 {
 
 #board-container {
     display: flex;
-    justify-content: center;  /* Center horizontally */
-    align-items: center;      /* Center vertically */
+
+    /* Center horizontally */
+    justify-content: center;
+    
+    /* Center vertically */
+    align-items: center;
 }
 
 tr, td {
@@ -65,9 +86,8 @@ th {
 }
 
 .panel-button {
-    width: 100%;
     align-content: center;
-    margin-bottom: 1rem;
+    margin-bottom: .75rem;
 }
 
 /* ctr = container */

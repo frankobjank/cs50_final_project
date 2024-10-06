@@ -52,10 +52,6 @@ def minesweeper():
         # If reset in request
         if fl.request.form.get("reset"):
 
-            # # Create new state/board
-            # fl.session["mstate"] = ms.State()
-            # fl.session["mstate"].create_board(difficulty="easy", fixed_mines=True)
-
             # Redirect to initial get request
             fl.redirect("/minesweeper")
 
@@ -66,7 +62,7 @@ def minesweeper():
         square_idx = fl.request.form.get("square")
 
         # Only return data if game not over
-        if square_idx and not mstate.game_over:
+        if square_idx and not (mstate.win or mstate.lose):
             mstate.update_server(square_idx)
             
             # Return to mines or visible squares to client

@@ -70,7 +70,7 @@ class State:
 
         # Win/Lose
         self.win = False
-        self.game_over = False
+        self.lose = False
         self.reset = False
         self.blow_up = None
 
@@ -163,7 +163,7 @@ class State:
 
     def setup_packet(self):
         # Only need dimensions; keep mines and adj info hidden on server side
-        return {"width": self.width, "height": self.height}
+        return {"width": self.width, "height": self.height, "num_mines": self.num_mines}
 
 
     def update_server(self, selection_index: str):
@@ -173,7 +173,7 @@ class State:
         
         # Hit mine; game over
         if square.mine:
-            self.game_over = True
+            self.lose = True
             self.blow_up = square
 
             # Game over; freeze time
@@ -192,15 +192,13 @@ class State:
         
         if self.check_for_win():
             self.win = True
-            self.game_over = True
-            self.score = self.get_game_time()
 
 
     def update_packet(self):
         # Reveal adj, vis, mines as needed
-        packet = {"adj": [], "visible": [], "mines": []}
+        packet = {"adj": [], "visible": [], "mines": [], "win": False}
         
-        if self.game_over:
+        if self.lose:
             packet["mines"] = [self.coords_to_index((m.x, m.y)) for m in self.mines]
 
         # Append index of visible square and adj value corresponding with that square
@@ -215,7 +213,6 @@ class State:
 
 
     def check_for_win(self):
-
         # Check if all non-mine squares are visible
         return len(self.visible) == (self.width * self.height) - len(self.mines)
 
