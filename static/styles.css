@@ -1,3 +1,93 @@
+/* use root to set global var grid size */
+:root {
+    --grid-width: 9;
+    --grid-height: 9;
+}
+
+/* Minesweeper */
+#board-container {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-width), 1fr); /* Create 9 equal columns */
+    grid-template-rows: repeat(var(--grid-height), 1fr);   /* Create 9 equal rows */
+    width: 18rem;
+    height: 18rem;
+    gap: 0px;
+    border: 2px solid black;
+    
+    align-items: center;
+    place-self: center;
+    justify-content: center;
+
+    /* display:block; */
+
+    /* line-height: 0; */
+
+}
+
+.panel-button {
+    align-content: center;
+    margin-bottom: .75rem;
+}
+
+.panel-container {
+    font-family: monospace;
+    font-weight: bold;
+    padding-bottom: .5rem;
+    font-size: 1.5rem;
+}
+
+.board-row {
+    max-height: 2rem;
+    overflow:hidden;
+    line-height: 0;
+}
+
+.square-button {
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    height: 2rem;
+    width: 2rem;
+    color: #000000;
+}
+
+button {
+    max-height: min-content;
+}
+
+/* Remove blue outline for minesweeper squares */
+.square-button:focus{
+    outline: 0;
+}
+
+/* Flags are purple */
+.square-button[data-flagged] {
+    background-color: purple;
+}
+
+/* Mines are red */
+.square-button[data-mine] {
+    background-color: red;
+    /* font-size: 2rem; */
+    /* font-weight: 800; */
+}
+
+/* Wrongly flagged squares get strikethrough */
+.square-button[data-false-flag] {
+    text-decoration-line: line-through;
+}
+
+/* Color of visible squares */
+.square-button:disabled {
+    background-color: rgb(184, 183, 183);
+}
+
+
+/* General layout */
+
 header {
     background-color: #121111;
     color: #ffffff;
@@ -9,74 +99,6 @@ header {
 h1 {
     font-size: 4rem;
     font-weight: bold;
-}
-
-.panel-container {
-    font-family: monospace;
-    font-weight: bold;
-    padding-bottom: .5rem;
-    font-size: 1.5rem;
-}
-
-/* Remove blue outline for minesweeper squares */
-.square:focus{
-    outline: 0;
-}
-
-/* Flags are purple */
-.square[data-flagged] {
-    background-color: purple;
-}
-
-/* Mines are red */
-.square[data-mine] {
-    background-color: red;
-    font-size: 2rem;
-    font-weight: 800;
-}
-
-/* Wrongly flagged squares get strikethrough */
-.square[data-false-flag] {
-    text-decoration-line: line-through;
-}
-
-/* Color of visible squares */
-.square:disabled {
-    background-color: rgb(184, 183, 183);
-}
-
-.square {
-    /* Color of text inside square buttons */
-    color: #000000;
-}
-
-#board-container {
-    display: flex;
-    
-    /* Puts panel above the board */
-    flex-direction: column;
-
-    /* Center horizontally */
-    justify-content: center;
-    
-    /* Center vertically */
-    align-items: center;
-}
-
-.row {
-    flex: none;
-}
-
-.square {
-    padding: 0;
-    margin: 0;
-    height: 2.5rem;
-    width: 2.5rem;
-}
-
-.panel-button {
-    align-content: center;
-    margin-bottom: .75rem;
 }
 
 /* ctr = container */

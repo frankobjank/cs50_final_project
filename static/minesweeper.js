@@ -4,9 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
     hasStarted = false;
     gameOver = false;
 
+    // Adjust size of grid based on board vars
+    // document.documentElement.style.setProperty('--grid-size', gridSize);
+    
     // Insert to board-container: panel, board
-    document.getElementById('board-container').appendChild(createPanel(serverBoard));
-    document.getElementById('board-container').appendChild(createBoard(serverBoard));
+    document.getElementById('board-container-small').appendChild(createPanel(serverBoard));
+    document.getElementById('board-container-small').appendChild(createBoard(serverBoard));
 });
 
 
@@ -119,7 +122,7 @@ function createBoard(serverBoard) {
             // Calculate index from (x, y) coordinates
             let index = y * serverBoard.height + x;
 
-            // Create span for button
+            // Create div for button
             let square = document.createElement('span');
             square.className = 'square';
             square.index = index;
