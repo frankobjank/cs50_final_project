@@ -14,16 +14,8 @@ h1 {
 .panel-container {
     font-family: monospace;
     font-weight: bold;
-}
-
-#timer {
     padding-bottom: .5rem;
     font-size: 1.5rem;
-}
-
-#minesRemaining {
-    padding-bottom: .5rem;
-    font-size: 1rem;
 }
 
 /* Remove blue outline for minesweeper squares */
@@ -40,7 +32,7 @@ h1 {
 .square[data-mine] {
     background-color: red;
     font-size: 2rem;
-    font-weight:800;
+    font-weight: 800;
 }
 
 /* Wrongly flagged squares get strikethrough */
@@ -60,6 +52,9 @@ h1 {
 
 #board-container {
     display: flex;
+    
+    /* Puts panel above the board */
+    flex-direction: column;
 
     /* Center horizontally */
     justify-content: center;
@@ -68,21 +63,15 @@ h1 {
     align-items: center;
 }
 
-tr, td {
-    margin-top: 0;
-    padding: 0;
-    height: 1rem;
-    width: 1rem;
+.row {
+    flex: none;
 }
 
 .square {
+    padding: 0;
+    margin: 0;
     height: 2.5rem;
     width: 2.5rem;
-}
-
-th {
-    align-content: center;
-    align-items: center;
 }
 
 .panel-button {

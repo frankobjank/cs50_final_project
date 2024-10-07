@@ -24,7 +24,6 @@ def after_request(response):
 
 @app.route("/")
 def index():
-
     return fl.render_template("index.html")
 
 

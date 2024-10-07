@@ -115,7 +115,7 @@ class State:
 
     def set_difficulty(self, difficulty):
         if difficulty == "easy":
-            self.width, self.height, self.num_mines = 10, 10, 10
+            self.width, self.height, self.num_mines = 9, 9, 10
         elif difficulty == "medium":
             self.width, self.height, self.num_mines = 16, 16, 40
         elif difficulty == "hard":
@@ -134,7 +134,7 @@ class State:
             self.mines = set(
                 self.squares[(mine_coord)] for mine_coord in [
                     (1, 2), (6, 4), (2, 3), (0, 5), (7, 5),
-                    (3, 6), (7, 6), (0, 7), (2, 7), (2, 9)])
+                    (3, 6), (7, 6), (0, 7), (2, 7), (2, 8)])
 
             for mine in self.mines:
                 self.squares[(mine.x, mine.y)].mine = True

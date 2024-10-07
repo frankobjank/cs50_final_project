@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     hasStarted = false;
     gameOver = false;
 
-    // Insert the table into the DOM
+    // Insert to board-container: panel, board
+    document.getElementById('board-container').appendChild(createPanel(serverBoard));
     document.getElementById('board-container').appendChild(createBoard(serverBoard));
 });
 
@@ -55,94 +56,79 @@ function success(response) {
 }
 
 
-function createBoard(serverBoard) {
+// Create panel for mines remaining, reset, timer
+function createPanel(serverBoard) {
 
-    const numMines = serverBoard.num_mines;
-
-    // Create table element for board
-    const table = document.createElement('table');
-    table.className = 'board-table';
-
-    // Create table head for timer, mines remaining, controls
-    const thead = document.createElement('thead');
-    thead.className = 'panel-container';
-    
+    let panel = document.createElement('div');
+    panel.className = 'panel';
+    panel.id = 'panel';
+ 
     // Create panel
-
     // Mines Remaining
-    const thMines = document.createElement('th');
-
-    // Set items in header to span more than one col
-    thMines.colSpan="4"
-    
-    thMines.className = 'minesRemaining';
-    thMines.id = 'minesRemaining';
-    thMines.innerText = numMines
-
-    // Add th to thead
-    thead.appendChild(thMines);
+    const mines = document.createElement('span');
+    mines.className = 'minesRemaining panel-span';
+    mines.id = 'minesRemaining';
+    mines.innerText = padNumber(serverBoard.num_mines);
     
     // Reset button
-    const thReset = document.createElement('th');
+    const reset = document.createElement('button');
+    reset.className = 'btn btn-outline-danger btn-block panel-button';
+    reset.id = 'reset';
+    reset.innerText = 'Reset';
     
-    // Set items in header to span more than one col
-    thReset.colSpan="2"
-    
-    let b = document.createElement('button');
-    b.className = 'btn btn-outline-danger btn-block panel-button';
-    b.id = 'reset';
-    b.innerText = 'Reset';
-    
-    // Add event listener; setting 'onclick' was activating on page load
-    b.addEventListener('mouseup', (event) => {
-        
-        if (event.button === 0) {            
+    // Add event listener; setting 'onclick' was activating click on page load
+    reset.addEventListener('mouseup', (event) => {
+        if (event.button === 0) {  
+
             // Quick way to reset - literally refresh the page
             window.location.reload();
         }
     });
-
-    // Add button to th; th to thead
-    thReset.appendChild(b);
-    thead.appendChild(thReset);
     
     // Timer
-    const thTimer = document.createElement('th');
-    
-    // Set items in header to span more than one col
-    thTimer.colSpan="4"
-    
-    thTimer.className = 'timer';
-    thTimer.id = 'timer';
-    thTimer.innerText = '000'
+    const timer = document.createElement('span');
+    timer.className = 'timer panel-span';
+    timer.id = 'timer';
+    timer.innerText = '000'
 
-    // Add th to thead
-    thead.appendChild(thTimer);
+    // Add all elements to panel
+    panel.appendChild(mines);
+    panel.appendChild(reset);
+    panel.appendChild(timer);
 
-    // Add thead to table
-    table.appendChild(thead);
-    
-    // Create table body for buttons
-    const tbody = document.createElement('tbody');
+    return panel;
+}
+
+
+function createBoard(serverBoard) {
+
+    // Create div element for board
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.id = 'board';
 
     for (let y = 0; y < serverBoard.height; y++) {
 
-        // Create table row
-        const tr = document.createElement('tr');
+        // Create board row
+        const row = document.createElement('div');
+        row.className = 'board-row';
 
         // Create table data cells
         for (let x = 0; x < serverBoard.width; x++) {
-            const td = document.createElement('td');
 
-            // Calculate index from of (x, y) coordinates
+            // Calculate index from (x, y) coordinates
             let index = y * serverBoard.height + x;
 
+            // Create span for button
+            let square = document.createElement('span');
+            square.className = 'square';
+            square.index = index;
+
             // Create button
-            let b = document.createElement('button')
+            let b = document.createElement('button');
             
             // Assign attributes to button
-            b.className = 'square';
-            b.name = index;
+            b.className = 'square-button';
             b.id = index;
 
             // Add EventListeners to button
@@ -162,12 +148,7 @@ function createBoard(serverBoard) {
                             return;
                         }
 
-                        // Get minutes and seconds
-                        let minutes = Math.floor(count / 60);
-                        let seconds = count % 60;
-
-                        // Split minutes and seconds into digits to add leading zeroes
-                        thTimer.innerHTML = `${Math.floor(minutes / 10)}${minutes % 10}:${Math.floor(seconds / 10)}${seconds % 10}`;
+                        document.getElementById('timer').innerHTML = padNumber(count);
 
                     }, 1000);
                 }
@@ -191,20 +172,21 @@ function createBoard(serverBoard) {
                     b.toggleAttribute('data-flagged');
 
                     // Calc mines - flags for Remaining Mines value
-                    let minesRemaining = numMines - document.querySelectorAll('.square[data-flagged]').length;
+                    let minesRemaining = serverBoard.num_mines - document.querySelectorAll('.square[data-flagged]').length;
 
                     // Set to 0 if below 0
                     if (0 > minesRemaining) {
                         minesRemaining = 0;
                     }
                     
-                    // Add to panel
-                    thMines.innerText = `Mines left: ${minesRemaining}`;
+                    // Add to panel; padded by 0s
+                    document.getElementById('minesRemaining').innerText = padNumber(minesRemaining);
                 }
             });
             
             // Grab focus on hover - BUG: this keeps focus even after mouse leaves square
             b.addEventListener("mousemove", (event) => {
+
                 b.focus();
             });
 
@@ -218,30 +200,26 @@ function createBoard(serverBoard) {
                     b.toggleAttribute('data-flagged');
 
                     // Calc mines - flags for Remaining Mines value
-                    let minesRemaining = numMines - document.querySelectorAll('.square[data-flagged]').length;
+                    let minesRemaining = serverBoard.num_mines - document.querySelectorAll('.square[data-flagged]').length;
                     
                     // Set to 0 if below 0
                     if (0 > minesRemaining) {
                         minesRemaining = 0;
                     }
                     
-                    // Add to panel
-                    thMines.innerText = `Mines left: ${minesRemaining}`;
+                    // Add to panel; padded by 0s
+                    document.getElementById('minesRemaining').innerText = padNumber(minesRemaining);
                 }
             });
 
-            /* Set 'onclick' -- this is redundant due to 'addEventListener' above */
-            // button.setAttribute('onclick', `serverRequest(${button.id})`);
-            
-            td.appendChild(b);
-            tr.appendChild(td);
+            square.appendChild(b);
+            row.appendChild(square);
         }
 
-        tbody.appendChild(tr);
+        board.appendChild(row);
     }
-    table.appendChild(tbody);
 
-    return table;
+    return board;
 }
 
 
@@ -271,9 +249,16 @@ function updateBoard(response) {
             }
         }
     }
+    
+    // Game over; win
+    if (response.win) {
+        
+        // Change reset text
+        document.querySelector('#reset').textContent = 'WIN!'
+    }
 
     // Game over; lose
-    if (response.mines.length > 0) {
+    else if (response.mines.length > 0) {
         
         // List of indices of mines
         for (sqIndex of response.mines) {
@@ -300,16 +285,10 @@ function updateBoard(response) {
         // Change reset text
         document.querySelector('#reset').textContent = 'LOSE'
     }
-    
-    // Game over; win
-    else if (response.win) {
-        
-        // Change reset text
-        document.querySelector('#reset').textContent = 'WIN!'
-    }
 }
 
 
-function padNumbers(num) {
-    return `${Math.floor(num / 100)}${Math.floor(num / 10)}`
+// Pad minesRemaining and timer with 0s
+function padNumber(num) {
+    return num.toString().padStart(3, '0');
 }
