@@ -4,24 +4,23 @@
     --grid-height: 9;
 }
 
-/* Minesweeper */
-#board-container {
+.board-container{
     display: grid;
+    align-items: center;
+}
+
+/* Minesweeper */
+#board {
+    display: grid;
+    place-items: center;
+    place-self: center;
     grid-template-columns: repeat(var(--grid-width), 1fr); /* Create 9 equal columns */
     grid-template-rows: repeat(var(--grid-height), 1fr);   /* Create 9 equal rows */
     width: 18rem;
     height: 18rem;
     gap: 0px;
-    border: 2px solid black;
-    
-    align-items: center;
-    place-self: center;
-    justify-content: center;
-
-    /* display:block; */
-
-    /* line-height: 0; */
-
+    position: inherit;
+    line-height: 0;
 }
 
 .panel-button {
@@ -36,26 +35,16 @@
     font-size: 1.5rem;
 }
 
-.board-row {
-    max-height: 2rem;
-    overflow:hidden;
-    line-height: 0;
-}
-
 .square-button {
     justify-content: center;
     align-items: center;
-    font-size: 12px;
+    font-size: 1rem;
     overflow: hidden;
     padding: 0;
     margin: 0;
     height: 2rem;
     width: 2rem;
     color: #000000;
-}
-
-button {
-    max-height: min-content;
 }
 
 /* Remove blue outline for minesweeper squares */
@@ -71,8 +60,8 @@ button {
 /* Mines are red */
 .square-button[data-mine] {
     background-color: red;
-    /* font-size: 2rem; */
-    /* font-weight: 800; */
+    font-size: 1.5rem;
+    font-weight: 700;
 }
 
 /* Wrongly flagged squares get strikethrough */

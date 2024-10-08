@@ -112,10 +112,6 @@ function createBoard(serverBoard) {
 
     for (let y = 0; y < serverBoard.height; y++) {
 
-        // Create board row
-        const row = document.createElement('div');
-        row.className = 'board-row';
-
         // Create table data cells
         for (let x = 0; x < serverBoard.width; x++) {
 
@@ -123,7 +119,7 @@ function createBoard(serverBoard) {
             let index = y * serverBoard.height + x;
 
             // Create div for button
-            let square = document.createElement('span');
+            let square = document.createElement('div');
             square.className = 'square';
             square.index = index;
 
@@ -216,10 +212,8 @@ function createBoard(serverBoard) {
             });
 
             square.appendChild(b);
-            row.appendChild(square);
+            board.appendChild(square);
         }
-
-        board.appendChild(row);
     }
 
     return board;
