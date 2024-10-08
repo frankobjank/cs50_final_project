@@ -255,6 +255,11 @@ function updateBoard(response) {
         document.querySelector('#reset').textContent = 'WIN!'
     }
 
+
+    // Scenarios: 
+    
+    // should mark all mines even if flagged
+
     // Game over; lose
     else if (response.mines.length > 0) {
         
@@ -262,13 +267,9 @@ function updateBoard(response) {
         for (sqIndex of response.mines) {
             let b = document.getElementById(sqIndex);
             
-            // Reveal mine if it was not flagged
-            if (b.getAttribute('data-flagged') === null) {
-                
-                // Set mine attribute
-                b.setAttribute('data-mine', true);
-                b.innerText = '*';
-            }
+            // Set mine attribute
+            b.setAttribute('data-mine', true);
+            b.innerText = '*';
         }
 
         // Check if any squares were wrongly flagged

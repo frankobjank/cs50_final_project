@@ -56,15 +56,15 @@
     outline: 0;
 }
 
-/* Flags are purple */
-.square-button[data-flagged] {
-    background-color: purple;
-}
-
 /* Mines are red */
 .square-button[data-mine] {
     background-color: red;
     font-weight: 700;
+}
+
+/* Flags are purple */
+.square-button[data-flagged] {
+    background-color: purple;
 }
 
 /* Wrongly flagged squares get strikethrough */
