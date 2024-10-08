@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // document.documentElement.style.setProperty('--grid-size', gridSize);
     
     // Insert to board-container: panel, board
-    document.getElementById('board-container-small').appendChild(createPanel(serverBoard));
-    document.getElementById('board-container-small').appendChild(createBoard(serverBoard));
+    document.getElementById('board-container').appendChild(createPanel(serverBoard));
+    document.getElementById('board-container').appendChild(createBoard(serverBoard));
 });
 
 
@@ -69,13 +69,13 @@ function createPanel(serverBoard) {
     // Create panel
     // Mines Remaining
     const mines = document.createElement('span');
-    mines.className = 'minesRemaining panel-span';
+    mines.className = 'panel-span mx-2';
     mines.id = 'minesRemaining';
     mines.innerText = padNumber(serverBoard.num_mines);
     
     // Reset button
     const reset = document.createElement('button');
-    reset.className = 'btn btn-outline-danger btn-block panel-button';
+    reset.className = 'btn panel-button mx-1 mb-1';
     reset.id = 'reset';
     reset.innerText = 'Reset';
     
@@ -90,7 +90,7 @@ function createPanel(serverBoard) {
     
     // Timer
     const timer = document.createElement('span');
-    timer.className = 'timer panel-span';
+    timer.className = 'panel-span mx-2';
     timer.id = 'timer';
     timer.innerText = '000'
 
@@ -243,6 +243,7 @@ function updateBoard(response) {
 
             if (adj > 0) {
                 b.textContent = adj;
+                b.setAttribute('data-adj-num', adj)
             }
         }
     }
@@ -265,16 +266,16 @@ function updateBoard(response) {
             if (b.getAttribute('data-flagged') === null) {
                 
                 // Set mine attribute
-                b.toggleAttribute('data-mine');
+                b.setAttribute('data-mine', true);
                 b.innerText = '*';
             }
         }
 
         // Check if any squares were wrongly flagged
-        document.querySelectorAll('.square[data-flagged]').forEach((b) => {
+        document.querySelectorAll('.square-button[data-flagged]').forEach((b) => {
             
             // b is not a mine
-            if (b.getAttribute('data-mine') === null) {
+            if (!b.hasAttribute('data-mine')) {
                 b.toggleAttribute('data-false-flag');
             }
         });

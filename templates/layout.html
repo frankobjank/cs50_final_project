@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="en">
-
     <head>
-
         <meta charset="utf-8">
         <meta name="viewport" content="initial-scale=1, width=device-width">
 
@@ -25,25 +23,21 @@
     </head>
 
     <body>
+        <div class="nav">
+            <a class="nav-link" href="/" btn><h1>The Space</h1></a>
+        </div>
         <header>
-            <h1>The Space</h1>
-        </header>
-        {% if get_flashed_messages() %}
-            <header>
+            {% if get_flashed_messages() %}
                 <div class="alert alert-primary mb-0 text-center" role="alert">
                     {{ get_flashed_messages() | join(" ") }}
                 </div>
-            </header>
-        {% endif %}
+            {% endif %}
 
-        <main class="container py-5 text-center">
+            {% block header %}{% endblock %}
+        </header>
+        <main class="container text-center">
             {% block main %}{% endblock %}
         </main>
-
-        <footer>
-
-        </footer>
-
+        <footer></footer>
     </body>
-
 </html>

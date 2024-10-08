@@ -4,8 +4,11 @@
     Minesweeper
 {% endblock %}
 
+{% block header %}
+   <h2>Minesweeper</h2>
+{% endblock %}
+
 {% block main %}
-    
     <script type="text/javascript">
         /* Receive data as dict; transform into JSON */
         const serverBoard = {{ data|tojson }};
@@ -15,9 +18,6 @@
     <script type="text/javascript" src="/static/minesweeper.js"></script>
 
     <!-- Add panel, board to container via Javascript -->
-    <div class="board-container" id="board-container-small"></div>
+    <div class="board-container" id="board-container"></div>
 
-    <div class="nav">
-        <a href="/" class="btn-custom">Back to homepage</a>
-    </div>
 {% endblock %}
