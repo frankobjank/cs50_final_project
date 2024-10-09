@@ -16,8 +16,14 @@
     
     <!-- Javascript for building table and handling input -->
     <script type="text/javascript" src="/static/minesweeper.js"></script>
-
+    <div class="difficulty">
+        <form action="/minesweeper" method="get">
+            <button class="difficulty" name="difficulty" value="easy">Easy</input>
+            <button class="difficulty" name="difficulty" value="medium">Medium</button>
+            <button class="difficulty" name="difficulty" value="hard">Hard</button>
+        </form>
+    </div>
     <!-- Add panel, board to container via Javascript -->
-    <div class="board-container" id="board-container"></div>
+    <div class="board-container mb-5" id="board-container"></div>
 
 {% endblock %}

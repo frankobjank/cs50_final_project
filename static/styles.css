@@ -12,6 +12,7 @@
     display: grid;
     align-items: center;
     outline: #000000;
+    
 }
 
 .panel-container {
@@ -43,6 +44,7 @@
 
 .square-button {
     font-size: 1rem;
+    font-weight: bolder;
     padding: 0;
     margin: 0;
     height: var(--sq-size);
@@ -57,7 +59,7 @@
 }
 
 /* Mines are red */
-.square-button[data-mine] {
+.square-button[data-mine='unflagged'] {
     background-color: red;
     font-weight: 700;
 }
@@ -68,7 +70,7 @@
 }
 
 /* Wrongly flagged squares get strikethrough */
-.square-button[data-false-flag] {
+.square-button[data-flagged='miss'] {
     text-decoration-line: line-through;
     background-color: rgba(128, 0, 128, 0.624);
 }
@@ -132,7 +134,6 @@ header {
     padding: 1rem 1rem;
 }
 
-/* ctr = container */
 .container-custom {
     display: flex;
     flex-wrap: wrap;  /* Allow items to wrap onto the next line */
@@ -142,13 +143,18 @@ header {
     gap: 4rem; /* Adjust the spacing between items */
 }
 
+footer {
+    background-color: #000000;
+    color: #ffffff;
+    padding-top: 6rem;
+}
+
 .card {
     width: 18rem;
 }
 
 .btn-custom:hover {
     background-color: #bbbbbb;
-    color: #000000;
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 

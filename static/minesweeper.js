@@ -1,11 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    // Set global css vars to size of board
+    document.documentElement.style.setProperty('--grid-width', serverBoard.width);
+    document.documentElement.style.setProperty('--grid-height', serverBoard.height);
     
+
     // Keep track if game has started for timer
     hasStarted = false;
     gameOver = false;
-
-    // Adjust size of grid based on board vars
-    // document.documentElement.style.setProperty('--grid-size', gridSize);
     
     // Insert to board-container: panel, board
     document.getElementById('board-container').appendChild(createPanel(serverBoard));
@@ -110,10 +112,10 @@ function createBoard(serverBoard) {
     board.className = 'board';
     board.id = 'board';
 
-    for (let y = 0; y < serverBoard.height; y++) {
+    for (let y = 0; y < serverBoard.width; y++) {
 
         // Create table data cells
-        for (let x = 0; x < serverBoard.width; x++) {
+        for (let x = 0; x < serverBoard.height; x++) {
 
             // Calculate index from (x, y) coordinates
             let index = y * serverBoard.height + x;
@@ -171,15 +173,15 @@ function createBoard(serverBoard) {
                     b.toggleAttribute('data-flagged');
 
                     // Calc mines - flags for Remaining Mines value
-                    let minesRemaining = serverBoard.num_mines - document.querySelectorAll('.square[data-flagged]').length;
+                    let mines = serverBoard.num_mines - document.querySelectorAll('.square-button[data-flagged]').length;
 
                     // Set to 0 if below 0
-                    if (0 > minesRemaining) {
-                        minesRemaining = 0;
+                    if (0 > mines) {
+                        mines = 0;
                     }
                     
                     // Add to panel; padded by 0s
-                    document.getElementById('minesRemaining').innerText = padNumber(minesRemaining);
+                    document.getElementById('minesRemaining').innerText = padNumber(mines);
                 }
             });
             
@@ -199,7 +201,7 @@ function createBoard(serverBoard) {
                     b.toggleAttribute('data-flagged');
 
                     // Calc mines - flags for Remaining Mines value
-                    let minesRemaining = serverBoard.num_mines - document.querySelectorAll('.square[data-flagged]').length;
+                    let minesRemaining = serverBoard.num_mines - document.querySelectorAll('.square-button[data-flagged]').length;
                     
                     // Set to 0 if below 0
                     if (0 > minesRemaining) {
@@ -267,9 +269,16 @@ function updateBoard(response) {
         for (sqIndex of response.mines) {
             let b = document.getElementById(sqIndex);
             
-            // Set mine attribute
-            b.setAttribute('data-mine', true);
-            b.innerText = '*';
+            // Set mine attribute; unflagged
+            if (!b.hasAttribute('data-flagged')) {
+                b.setAttribute('data-mine', 'unflagged');
+                b.innerText = '*';
+            }
+            
+            // Else; set flagged
+            else {
+                b.setAttribute('data-mine', 'flagged');
+            }
         }
 
         // Check if any squares were wrongly flagged
@@ -277,7 +286,7 @@ function updateBoard(response) {
             
             // b is not a mine
             if (!b.hasAttribute('data-mine')) {
-                b.toggleAttribute('data-false-flag');
+                b.setAttribute('data-flagged', 'miss');
             }
         });
 

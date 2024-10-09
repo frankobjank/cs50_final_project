@@ -139,7 +139,7 @@ class State:
             for mine in self.mines:
                 self.squares[(mine.x, mine.y)].mine = True
 
-        # Assign random mines; not debug
+        # Assign random mines
         else:
             while len(self.mines) < self.num_mines:
                 mine = (self.get_random_coords())
@@ -215,8 +215,8 @@ class State:
         return packet
 
 
+    # Check if all non-mine squares are visible
     def check_for_win(self):
-        # Check if all non-mine squares are visible
         return len(self.visible) == (self.width * self.height) - len(self.mines)
 
 
