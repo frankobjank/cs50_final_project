@@ -4,3 +4,4 @@ psets/
 __pycache__/
 flask_session/
 scratch
+.DS_Store
