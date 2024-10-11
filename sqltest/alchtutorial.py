@@ -1,1 +1,0 @@
-/Users/jacobfrank/scratch/python/sql/alchtutorial.py
