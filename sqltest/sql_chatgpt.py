@@ -1,0 +1,1 @@
+/Users/jacobfrank/scratch/python/sql/sql_chatgpt.py
