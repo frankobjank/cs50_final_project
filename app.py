@@ -2,7 +2,7 @@ import flask as fl
 import minesweeper_game
 from flask_session import Session
 import sqlite3
-from time import time
+from time import time, strftime, localtime
 
 # link to access app for debug http://127.0.0.1:5000
 
@@ -26,6 +26,9 @@ def after_request(response):
 
 @app.route("/")
 def index():
+    # Set user_id to 1 for debug
+    fl.session["user_id"] = "1"
+
     return fl.render_template("index.html")
 
 
@@ -57,7 +60,7 @@ def minesweeper():
                 # Validate score received from client to prevent cheating
                 server_score = int(ms.score)
                 client_score = int(fl.request.form.get("score"))
-                
+
                 # Test if margin of error is less than 20%
                 if abs(server_score - client_score) < (0.2 * server_score):
                     server_score = client_score
@@ -97,7 +100,7 @@ def minesweeper():
     # GET - create board and send
     elif fl.request.method == "GET":
         # Set user_id to 1 for debug
-        fl.session["user_id"] = 1
+        fl.session["user_id"] = "1"
 
         # Get difficulty from client; defaults to easy
         difficulty = fl.request.args.get("difficulty", "easy")
@@ -110,7 +113,54 @@ def minesweeper():
         return fl.render_template("minesweeper.html", data=fl.session["ms"].setup_packet())
 
 
+@app.route("/minesweeper/stats")
+def minesweeper_stats():
+    db_responses = {}  # {"easy": [], "medium": [], "hard": []}
+    
+    # Query database and retrieve the stats
+    with sqlite3.connect("database.db") as conn:
+        conn.row_factory = dict_factory
+        modes = ["easy", "medium", "hard"]
+
+        # To do in one transaction, could sort into mode as 
+        for mode in modes:
+            db_responses[mode] = conn.execute(
+                "SELECT score, win FROM ms_stats WHERE user_id = ? AND mode = ? AND score != 0", ("1", mode)
+            )
+
+    ### To format date::
+    # for mode, response in db_responses.items():
+        # for r in response:
+            # r["date"] = strftime("%Y-%m-%d %H:%M:%S", localtime(r["date"]))
+            # print(f"{mode}: {r}")
+
+    # Calculate win rate and average time for win
+    data = {"easy": {}, "medium": {}, "hard": {}}  # {"easy": {win_rate: 0, average_score: 0}...}
+
+    modes = ["easy", "medium", "hard"]
+
+    for mode in modes:
+        games_won = 0.0
+        total_scores = 0.0
+        for row in db_responses[mode]:
+            if row["win"]:
+                games_won += row["win"]
+                total_scores += row["score"]
+        
+        total_games = float(len(db_responses))
+        
+        data[mode]["win_rate"] = round(games_won/total_games, 2)
+        data[mode]["average_score"] = round(total_scores/total_games, 2)
+
+    return fl.render_template("minesweeper_stats.html", data=data)
+
+
 # Add user manually; not live on site yet; no password
 def register(user_id):
     with sqlite3.connect("database.db") as conn:
         conn.execute("INSERT INTO users (username, date) VALUES (?, ?)", (user_id, int(time())))
+
+# For returning SQL as dict
+def dict_factory(cursor, row):
+    fields = [column[0] for column in cursor.description]
+    return {key: value for key, value in zip(fields, row)}
