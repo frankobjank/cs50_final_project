@@ -203,7 +203,8 @@ class State:
         # Reveal adj, vis, mines as needed
         packet = {"adj": [], "visible": [], "mines": [], "win": self.win}
         
-        if self.lose:
+        # Send over mines on win AND lose
+        if self.game_over:
             packet["mines"] = [self.coords_to_index((m.x, m.y)) for m in self.mines]
 
         # Append index of visible square and adj value corresponding with that square

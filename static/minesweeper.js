@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function serverRequest(input) {
 
-    // Initialize data with nulls
-    let data = {'square': null, 'reset': null};
+    // Initialize data with nulls, current score
+    let data = {'square': null, 'reset': null, 'score': document.getElementById('timer').innerText};
 
     // If input is 'reset'
     if (input === 'reset') {
@@ -55,7 +55,7 @@ function success(response) {
     }
 
     // Set gameOver to true if mines are included in response
-    if (response.mines.length > 0 || response.win) {
+    if (response.mines.length > 0) {
         gameOver = true;
     }
 }
@@ -195,7 +195,7 @@ function createBoard(serverBoard) {
             b.addEventListener("keydown", (event) => {
 
                 // Press 'F' for right click
-                if (event.code === "KeyF") {
+                if (event.code === "KeyF" && !gameOver) {
 
                     // Toggle flag true/false
                     b.toggleAttribute('data-flagged');
@@ -250,32 +250,38 @@ function updateBoard(response) {
         }
     }
     
-    // Game over; win
-    if (response.win) {
-        
-        // Change reset text
-        document.querySelector('#reset').textContent = 'WIN!'
-    }
 
-
-    // Scenarios: 
     
-    // should mark all mines even if flagged
-
-    // Game over; lose
-    else if (response.mines.length > 0) {
+    // Game over; check false flags on lose, flag all mines on win
+    if (response.mines.length > 0) {
         
+        // Change reset text for win or lose
+        if (response.win) {
+            document.querySelector('#reset').textContent = 'WIN!'
+        }
+        else {
+            document.querySelector('#reset').textContent = 'LOSE'
+        }
+
         // List of indices of mines
         for (sqIndex of response.mines) {
             let b = document.getElementById(sqIndex);
             
-            // Set mine attribute; unflagged
+            // Handle unflagged mines
             if (!b.hasAttribute('data-flagged')) {
-                b.setAttribute('data-mine', 'unflagged');
-                b.innerText = '*';
+                // On win - add flags and set mines to flagged
+                if (response.win) {
+                    b.toggleAttribute('data-flagged');
+                    b.setAttribute('data-mine', 'flagged');
+                }
+                // On lose - set mines to unflagged
+                else {
+                    b.setAttribute('data-mine', 'unflagged');
+                    b.innerText = '*';
+                }
             }
             
-            // Else; set flagged
+            // If already flagged, set mines to flagged
             else {
                 b.setAttribute('data-mine', 'flagged');
             }
@@ -289,9 +295,6 @@ function updateBoard(response) {
                 b.setAttribute('data-flagged', 'miss');
             }
         });
-
-        // Change reset text
-        document.querySelector('#reset').textContent = 'LOSE'
     }
 }
 

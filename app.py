@@ -1,5 +1,5 @@
 import flask as fl
-import minesweeper
+import minesweeper_game
 from flask_session import Session
 import sqlite3
 from time import time
@@ -37,10 +37,8 @@ def minesweeper():
         
         print(f"request: {fl.request.form}")
 
-        # If reset in request
+        # Redirect to initial `get` request on reset
         if fl.request.form.get("reset"):
-
-            # Redirect to initial get request
             fl.redirect("/minesweeper")
 
         # Retrieve minesweeper state from session
@@ -54,21 +52,41 @@ def minesweeper():
             ms.update_server(square_idx)
             
             # Connect to database on gameover; should only happen once
-                # Client disconnection should result in loss
             if ms.game_over:
-                with sqlite3.connect("minesweeper") as conn:
+                
+                # Validate score received from client to prevent cheating
+                server_score = int(ms.score)
+                client_score = int(fl.request.form.get("score"))
+                
+                # Test if margin of error is less than 20%
+                if abs(server_score - client_score) < (0.2 * server_score):
+                    server_score = client_score
+
+                print(f"SERVER TIME {server_score}")
+                print(f"CLIENT TIME {client_score}")
+
+                # Update database
+                with sqlite3.connect("database.db") as conn:
                     conn.execute(
                         """
-                        INSERT INTO stats (mode, score, win, date, user_id)
+                        INSERT INTO ms_stats (mode, score, win, date, user_id)
                         VALUES (?, ?, ?, ?, ?)
-                        """, (ms.difficulty, int(ms.score), ms.win, int(time()), 0)
+                        """, (
+                            ms.difficulty,         # mode
+                            client_score,          # score
+                            ms.win,                # win
+                            int(time()),           # date
+                            fl.session["user_id"]  # user_id
+                        )
                     )
                     
-            
-            # Return to mines or visible squares to client
+            # Return mines, visible squares to client
             response = ms.update_packet()
-
             print(f"returning: {response}")
+            
+            # Banner for win; might have to add to response somehow
+            # if ms.win:
+                # fl.flash("Congratulations! You win!")
             
             return response
 
@@ -78,15 +96,21 @@ def minesweeper():
 
     # GET - create board and send
     elif fl.request.method == "GET":
-        
+        # Set user_id to 1 for debug
+        fl.session["user_id"] = 1
+
         # Get difficulty from client; defaults to easy
         difficulty = fl.request.args.get("difficulty", "easy")
 
         # Create new minesweeper State object; add to flask session to access later
-        fl.session["ms"] = minesweeper.State()
+        fl.session["ms"] = minesweeper_game.State()
         fl.session["ms"].create_board(difficulty=difficulty)  # , fixed_mines=True)
 
         # Send to client as dict
         return fl.render_template("minesweeper.html", data=fl.session["ms"].setup_packet())
 
-    
+
+# Add user manually; not live on site yet; no password
+def register(user_id):
+    with sqlite3.connect("database.db") as conn:
+        conn.execute("INSERT INTO users (username, date) VALUES (?, ?)", (user_id, int(time())))
