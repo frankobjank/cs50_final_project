@@ -1,5 +1,5 @@
 import random
-import time
+from time import time
 from collections import namedtuple
 
 
@@ -61,6 +61,7 @@ class State:
         self.width = 0
         self.height = 0
         self.num_mines = 0
+        self.difficulty = ""
 
         # Board Collections
         self.squares = {}
@@ -76,14 +77,9 @@ class State:
         self.blow_up = None
 
         # Timing
-        self.start_clock = False
-        self.start_time = time.time()
-        self.game_time = 0
+        self.has_started = False
+        self.start_time = 0
         self.score = 0
-    
-
-    def get_game_time(self):
-        return time.time() - self.start_time
     
 
     def coords_to_index(self, coords: tuple) -> int:
@@ -113,37 +109,39 @@ class State:
         return (dm[1], dm[0])
 
 
-    def set_difficulty(self, difficulty):
-        if difficulty == "easy":
+    def set_dimensions(self):
+        if self.difficulty == "easy":
             self.width, self.height, self.num_mines = 9, 9, 10
-        elif difficulty == "medium":
+        elif self.difficulty == "medium":
             self.width, self.height, self.num_mines = 16, 16, 40
-        elif difficulty == "hard":
+        elif self.difficulty == "hard":
             self.width, self.height, self.num_mines =  30, 16, 99
 
 
     def create_board(self, difficulty, fixed_mines=False):
-        # set dimensions based on difficulty
-        self.set_difficulty(difficulty)
 
-        # create all squares - dict
+        # Set difficulty & dimensions
+        self.difficulty = difficulty
+        self.set_dimensions()
+
+        # Create all squares - dict
         self.squares = {(x, y): Square(x, y) for y in range(self.height) for x in range(self.width)}
 
+        # Assign random mines
+        if not fixed_mines:
+            while len(self.mines) < self.num_mines:
+                mine = (self.get_random_coords())
+                self.mines.add(self.squares[(mine.x, mine.y)])
+                self.squares[(mine.x, mine.y)].mine = True
+        
         # Fixed_mines mines for debugging
-        if fixed_mines:
+        elif fixed_mines:
             self.mines = set(
                 self.squares[(mine_coord)] for mine_coord in [
                     (1, 2), (6, 4), (2, 3), (0, 5), (7, 5),
                     (3, 6), (7, 6), (0, 7), (2, 7), (2, 8)])
 
             for mine in self.mines:
-                self.squares[(mine.x, mine.y)].mine = True
-
-        # Assign random mines
-        else:
-            while len(self.mines) < self.num_mines:
-                mine = (self.get_random_coords())
-                self.mines.add(self.squares[(mine.x, mine.y)])
                 self.squares[(mine.x, mine.y)].mine = True
 
         # Calc adj to mines
@@ -168,6 +166,10 @@ class State:
 
 
     def update_server(self, selection_index: str):
+        # Start clock on first move if not started yet
+        if not self.has_started:
+            self.start_time = time()
+            self.has_started = True
         
         # Convert index to int and access squares dict
         square = self.squares[self.index_to_coords(int(selection_index))]
@@ -177,9 +179,6 @@ class State:
             self.lose = True
             self.game_over = True
             self.blow_up = square
-
-            # Game over; freeze time
-            self.score = self.get_game_time()
 
         # Hit a number
         elif square.adj > 0: 
@@ -196,6 +195,9 @@ class State:
             self.win = True
             self.game_over = True
 
+        # If gameover; freeze time
+        if self.game_over:
+            self.score = time() - self.start_time
 
     def update_packet(self):
         # Reveal adj, vis, mines as needed

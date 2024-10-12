@@ -1,6 +1,8 @@
 import flask as fl
-import minesweeper as ms
+import minesweeper
 from flask_session import Session
+import sqlite3
+from time import time
 
 # link to access app for debug http://127.0.0.1:5000
 
@@ -29,27 +31,9 @@ def index():
 
 @app.route("/minesweeper", methods=["GET", "POST"])
 def minesweeper():
-
-    # GET - create board and send
-    if fl.request.method == "GET":
-        
-        # Get difficulty from client; defaults to easy
-        difficulty = fl.request.args.get("difficulty", "easy")
-
-        # Create new minesweeper State object; add to flask session to access later
-        fl.session["mstate"] = ms.State()
-
-        # Create board
-        fl.session["mstate"].create_board(difficulty=difficulty)  # , fixed_mines=True)
-        
-        # Create packet
-        data = fl.session["mstate"].setup_packet()
-
-        # Send to client as dict data
-        return fl.render_template("minesweeper.html", data=data)
-
+    
     # POST - receive requests and update board
-    elif fl.request.method == "POST":
+    if fl.request.method == "POST":
         
         print(f"request: {fl.request.form}")
 
@@ -59,18 +43,30 @@ def minesweeper():
             # Redirect to initial get request
             fl.redirect("/minesweeper")
 
-        # Retrieve mstate from session
-        mstate = fl.session.get("mstate")
+        # Retrieve minesweeper state from session
+        ms = fl.session.get("ms")
 
         # Square index from client
         square_idx = fl.request.form.get("square")
 
         # Only return data if game not over
-        if square_idx and not (mstate.win or mstate.lose):
-            mstate.update_server(square_idx)
+        if square_idx and not (ms.win or ms.lose):
+            ms.update_server(square_idx)
+            
+            # Connect to database on gameover; should only happen once
+                # Client disconnection should result in loss
+            if ms.game_over:
+                with sqlite3.connect("minesweeper") as conn:
+                    conn.execute(
+                        """
+                        INSERT INTO stats (mode, score, win, date, user_id)
+                        VALUES (?, ?, ?, ?, ?)
+                        """, (ms.difficulty, int(ms.score), ms.win, int(time()), 0)
+                    )
+                    
             
             # Return to mines or visible squares to client
-            response = mstate.update_packet()
+            response = ms.update_packet()
 
             print(f"returning: {response}")
             
@@ -79,7 +75,18 @@ def minesweeper():
         print(f"returning nothing; 204")
         # flask requires a return value; 204 status will keep browser on current page
         return ("", 204)
-    
 
-# template for button once things are established
-# <!-- <button onclick="checkSquare()" class="square" name="b" id="{{ }}"></button> -->
+    # GET - create board and send
+    elif fl.request.method == "GET":
+        
+        # Get difficulty from client; defaults to easy
+        difficulty = fl.request.args.get("difficulty", "easy")
+
+        # Create new minesweeper State object; add to flask session to access later
+        fl.session["ms"] = minesweeper.State()
+        fl.session["ms"].create_board(difficulty=difficulty)  # , fixed_mines=True)
+
+        # Send to client as dict
+        return fl.render_template("minesweeper.html", data=fl.session["ms"].setup_packet())
+
+    
