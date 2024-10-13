@@ -3,6 +3,7 @@ import minesweeper_game
 from flask_session import Session
 import sqlite3
 from time import time, strftime, localtime
+from helpers import dict_factory, to_percent
 
 # link to access app for debug http://127.0.0.1:5000
 
@@ -125,32 +126,46 @@ def minesweeper_stats():
         # To do in one transaction, could sort into mode as 
         for mode in modes:
             db_responses[mode] = conn.execute(
-                "SELECT score, win FROM ms_stats WHERE user_id = ? AND mode = ? AND score != 0", ("1", mode)
+                "SELECT score, win, date FROM ms_stats WHERE user_id = ? AND mode = ? AND score != 0", ("1", mode)
             )
 
     ### To format date::
     # for mode, response in db_responses.items():
-        # for r in response:
-            # r["date"] = strftime("%Y-%m-%d %H:%M:%S", localtime(r["date"]))
-            # print(f"{mode}: {r}")
+    #     for r in response:
+    #         r["date"] = strftime("%Y-%m-%d %H:%M:%S", localtime(r["date"]))
+    #         print(f"{mode}: {r}")
 
-    # Calculate win rate and average time for win
-    data = {"easy": {}, "medium": {}, "hard": {}}  # {"easy": {win_rate: 0, average_score: 0}...}
+    # Calculate win rate and average time for win, best time for all modes
+    data = {"easy": {}, "medium": {}, "hard": {}}  # {"easy": {win_rate: 0, ...} ...}
 
-    modes = ["easy", "medium", "hard"]
-
-    for mode in modes:
+    for mode in data.keys():
         games_won = 0.0
-        total_scores = 0.0
+        total_win_scores = 0.0
+        total_games = 0.0
+        best_time = 0
+        
         for row in db_responses[mode]:
+            total_games += 1
+            
+            # get stats from won games
             if row["win"]:
+                # get lowest non-zero value for best_time
+                if best_time == 0 or best_time > row["score"]:
+                    best_time = row["score"]
                 games_won += row["win"]
-                total_scores += row["score"]
+                total_win_scores += row["score"]
         
-        total_games = float(len(db_responses))
-        
-        data[mode]["win_rate"] = round(games_won/total_games, 2)
-        data[mode]["average_score"] = round(total_scores/total_games, 2)
+        if total_games != 0:
+            data[mode]["win_rate"] = to_percent(games_won / total_games)
+        else:
+            data[mode]["win_rate"] = "-"
+
+        if games_won != 0:
+            data[mode]["average_win_score"] = round(total_win_scores / games_won, 1)
+            data[mode]["best_time"] = best_time
+        else:
+            data[mode]["average_win_score"] = "-"
+            data[mode]["best_time"] = "-"
 
     return fl.render_template("minesweeper_stats.html", data=data)
 
@@ -159,8 +174,3 @@ def minesweeper_stats():
 def register(user_id):
     with sqlite3.connect("database.db") as conn:
         conn.execute("INSERT INTO users (username, date) VALUES (?, ?)", (user_id, int(time())))
-
-# For returning SQL as dict
-def dict_factory(cursor, row):
-    fields = [column[0] for column in cursor.description]
-    return {key: value for key, value in zip(fields, row)}

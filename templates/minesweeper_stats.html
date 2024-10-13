@@ -10,6 +10,33 @@
 
 {% block main %}
     <div class="stats mb-5">
-        {{ data }}
+        <table class="table">
+            <thead>
+                <th></th>
+                <th>Easy</th>
+                <th>Medium</th>
+                <th>Hard</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Best Time</th>
+                    <td>{{ data["easy"]["best_time"] }}</td>
+                    <td>{{ data["medium"]["best_time"] }}</td>
+                    <td>{{ data["hard"]["best_time"] }}</td>
+                </tr>
+                <tr>
+                    <th>Average Win Time</th>
+                    <td>{{ data["easy"]["average_win_score"] }}</td>
+                    <td>{{ data["medium"]["average_win_score"] }}</td>
+                    <td>{{ data["hard"]["average_win_score"] }}</td>
+                </tr>
+                <tr>
+                    <th>Win Rate</th>
+                    <td>{{ data["easy"]["win_rate"] }}</td>
+                    <td>{{ data["medium"]["win_rate"] }}</td>
+                    <td>{{ data["hard"]["win_rate"] }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}
