@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.documentElement.style.setProperty('--grid-width', serverBoard.width);
     document.documentElement.style.setProperty('--grid-height', serverBoard.height);
     
+    document.getElementById('board-container').style.setProperty('width', serverBoard.width * 30)
+    document.getElementById('board-container').style.setProperty('height', serverBoard.height * 30)
 
     // Keep track if game has started for timer
     hasStarted = false;
@@ -65,9 +67,9 @@ function success(response) {
 function createPanel(serverBoard) {
 
     let panel = document.createElement('div');
-    panel.className = 'panel';
+    panel.className = 'panel-container';
     panel.id = 'panel';
- 
+    
     // Create panel
     // Mines Remaining
     const mines = document.createElement('span');
@@ -84,21 +86,42 @@ function createPanel(serverBoard) {
     // Add event listener; setting 'onclick' was activating click on page load
     reset.addEventListener('mouseup', (event) => {
         if (event.button === 0) {  
-
+            
             // Quick way to reset - literally refresh the page
             window.location.reload();
         }
     });
-    
+        
     // Timer
     const timer = document.createElement('span');
     timer.className = 'panel-span mx-2';
     timer.id = 'timer';
     timer.innerText = '000'
+    
+    // Set fillers and filler dimensions
+    let panelFillers = []
+    for (i = 0; i < 2; i++) {
+        const p = document.createElement('span');
+        p.className = 'panel-filler mx-2'
+    
+        if (serverBoard.difficulty === 'easy') {
+            p.style.maxWidth = 0;
+        }
+        else if (serverBoard.difficulty === 'medium') {
+            p.style.width = '90px';
+        }
+        else if (serverBoard.difficulty === 'hard') {
+            p.style.width = '285px';
+        }
 
+        panelFillers.push(p)
+    }
+    
     // Add all elements to panel
     panel.appendChild(mines);
+    panel.appendChild(panelFillers[0]);
     panel.appendChild(reset);
+    panel.appendChild(panelFillers[1]);
     panel.appendChild(timer);
 
     return panel;

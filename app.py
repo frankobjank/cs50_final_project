@@ -140,31 +140,36 @@ def minesweeper_stats():
 
     for mode in data.keys():
         games_won = 0.0
-        total_win_scores = 0.0
+        total_scores = 0.0
         total_games = 0.0
         best_time = 0
         
         for row in db_responses[mode]:
-            total_games += 1
             
-            # get stats from won games
-            if row["win"]:
-                # get lowest non-zero value for best_time
-                if best_time == 0 or best_time > row["score"]:
-                    best_time = row["score"]
-                games_won += row["win"]
-                total_win_scores += row["score"]
-        
+            # Get stats from non-trash rounds (5 or more seconds)
+            if row["score"] > 5:
+                total_games += 1
+                total_scores += row["score"]
+
+                # Count wins
+                if row["win"]:
+                    games_won += row["win"]
+               
+                    # Get lowest non-zero value for best_time
+                    if best_time == 0 or best_time > row["score"]:
+                        best_time = row["score"]
+                    
+
         if total_games != 0:
             data[mode]["win_rate"] = to_percent(games_won / total_games)
+            data[mode]["average_score"] = round(total_scores / total_games)
         else:
             data[mode]["win_rate"] = "-"
+            data[mode]["average_score"] = "-"
 
         if games_won != 0:
-            data[mode]["average_win_score"] = round(total_win_scores / games_won, 1)
             data[mode]["best_time"] = best_time
         else:
-            data[mode]["average_win_score"] = "-"
             data[mode]["best_time"] = "-"
 
     return fl.render_template("minesweeper_stats.html", data=data)

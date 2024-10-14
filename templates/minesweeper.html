@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block header %}
-   <h2>Minesweeper</h2>
+   <h2>Minesweeper - {{ data.difficulty | title }}</h2>
 {% endblock %}
 
 {% block main %}
@@ -16,15 +16,20 @@
     
     <!-- Javascript for building table and handling input -->
     <script type="text/javascript" src="/static/minesweeper.js"></script>
-    <div class="difficulty">
-        <form action="/minesweeper" method="get">
-            <button class="difficulty" name="difficulty" value="easy">Easy</input>
-            <button class="difficulty" name="difficulty" value="medium">Medium</button>
-            <button class="difficulty" name="difficulty" value="hard">Hard</button>
-        </form>
+
+    <div class="container-custom">
+        <div class="difficulty-container">
+            <form action="/minesweeper" method="get">
+                <button class="btn-custom difficulty-button" id="easy" name="difficulty" value="easy">Easy</button>
+                <button class="btn-custom difficulty-button" id="medium" name="difficulty" value="medium">Medium</button>
+                <button class="btn-custom difficulty-button" id="hard" name="difficulty" value="hard">Hard</button>
+            </form>
+        </div>
     </div>
+    
     <!-- Add panel, board to container via Javascript -->
     <div class="board-container mb-5" id="board-container"></div>
-
-    <a href="/minesweeper/stats" class="btn-custom">Stats</a>
+    <div class="link">
+        <a href="/minesweeper/stats" class="btn-custom" id="stats-button">Stats</a>
+    </div>
 {% endblock %}

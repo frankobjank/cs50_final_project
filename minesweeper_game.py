@@ -162,7 +162,7 @@ class State:
 
     def setup_packet(self):
         # Only need dimensions; keep mines and adj info hidden on server side
-        return {"width": self.width, "height": self.height, "num_mines": self.num_mines}
+        return {"width": self.width, "height": self.height, "num_mines": self.num_mines, "difficulty": self.difficulty}
 
 
     def update_server(self, selection_index: str):
