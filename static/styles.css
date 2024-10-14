@@ -3,6 +3,7 @@
     --grid-width: 9;
     --grid-height: 9;
     --sq-size: 1.75rem;
+    --bs-nav-link-color: white;
 }
 /* General layout */
 
@@ -26,13 +27,26 @@ h2 {
     color: #000000;
 }
 
+h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
 header {
-    text-align: center;
+    background-color: #000000;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
     padding: 1rem 1rem;
+    justify-content: center;
 }
 
 body {
     background-color: #dddddd;
+}
+
+a {
+    color: #ffffff
 }
 
 .container-custom {
@@ -41,15 +55,28 @@ body {
     justify-content: center;
     align-items: center;
     margin-bottom: 1.5rem;
-    /* padding: 2rem 1.5rem; */
     gap: 4rem; /* Adjust the spacing between items */
 }
 
 footer {
     background-color: #000000;
     color: #ffffff;
-    padding-top: 6rem;
+    /* padding-top: 6rem; */
     margin-top: 6rem;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    height: 100px;
+}
+
+.signature {
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+}
+
+.filler-span {
+    min-width: 30px;
 }
 
 .card {
@@ -122,15 +149,6 @@ footer {
     padding: .25rem;
     color: #0b3a5e;
     outline-offset: .2rem;
-    outline: groove rgb(93, 91, 91);
-    background-color: #c3ddda;
-    /* box-shadow:
-    inset #059c8e 0 0 0 1px, 
-    inset #009688 0 0 0 5px, 
-    inset #0cab9c 0 0 0 10px, 
-    inset #1fbdae 0 0 0 11px, 
-    inset #8ce9ff 0 0 0 16px; */
-
 }
 
 .panel-button {

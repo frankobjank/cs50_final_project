@@ -1,9 +1,13 @@
+# Python modules
 import flask as fl
-import minesweeper_game
 from flask_session import Session
 import sqlite3
-from time import time, strftime, localtime
+from time import time
+import werkzeug.security as ws
+
+# Python files
 from helpers import dict_factory, to_percent
+import minesweeper_game
 
 # link to access app for debug http://127.0.0.1:5000
 
@@ -127,13 +131,7 @@ def minesweeper_stats():
         for mode in modes:
             db_responses[mode] = conn.execute(
                 "SELECT score, win, date FROM ms_stats WHERE user_id = ? AND mode = ? AND score != 0", ("1", mode)
-            )
-
-    ### To format date::
-    # for mode, response in db_responses.items():
-    #     for r in response:
-    #         r["date"] = strftime("%Y-%m-%d %H:%M:%S", localtime(r["date"]))
-    #         print(f"{mode}: {r}")
+            )    
 
     # Calculate win rate and average time for win, best time for all modes
     data = {"easy": {}, "medium": {}, "hard": {}}  # {"easy": {win_rate: 0, ...} ...}
@@ -175,7 +173,152 @@ def minesweeper_stats():
     return fl.render_template("minesweeper_stats.html", data=data)
 
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+
+    # Forget any user_id
+    fl.session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if fl.request.method == "POST":
+        # Ensure username was submitted
+        if not fl.request.form.get("username"):
+            return apology("must provide username", 403)
+
+        # Ensure password was submitted
+        elif not fl.request.form.get("password"):
+            return apology("must provide password", 403)
+
+        # Query database for username
+        rows = db.execute("SELECT * FROM users WHERE username = ?",
+                          fl.request.form.get("username"))
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not ws.check_password_hash(
+            rows[0]["hash"], fl.request.form.get("password")
+        ):
+            return apology("invalid username and/or password", 403)
+
+        # Remember which user has logged in
+        fl.session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return fl.redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return fl.render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    fl.session.clear()
+
+    # Redirect user to login form
+    return fl.redirect("/")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+
+    if fl.request.method == "POST":
+        # Ensure username was submitted
+        if not fl.request.form.get("username"):
+            return apology("must provide username", 400)
+
+        # Ensure password was submitted
+        elif not fl.request.form.get("password"):
+            return apology("must provide password", 400)
+
+        # Ensure password matches confirmation
+        elif fl.request.form.get("password") != fl.request.form.get("confirmation"):
+            return apology("passwords must match", 400)
+
+        # Attempt to register account, check for dupe username
+        try:
+            # If not dupe, add row to table
+            db.execute(
+                "INSERT INTO users (username, hash) VALUES (?, ?)",
+                fl.request.form.get("username"),
+                ws.generate_password_hash(fl.request.form.get("password"))
+            )
+
+        # Dupe username
+        except ValueError:
+            return apology("username taken")
+
+        # Redirect user to login
+        return fl.redirect("/login")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return fl.render_template("register.html")
+
+
+@app.route("/change_password", methods=["GET", "POST"])
+def change_password():
+    """Change password"""
+
+    if fl.request.method == "POST":
+
+        # Ensure old password was submitted
+        if not fl.request.form.get("old_password"):
+            return apology("must provide password", 400)
+
+        # Ensure new password was submitted
+        elif not fl.request.form.get("new_password"):
+            return apology("must provide new password", 400)
+
+        # Ensure new password matches confirmation
+        elif fl.request.form.get("new_password") != fl.request.form.get("confirmation"):
+            return apology("new password and confirmation must match", 400)
+
+        # Query database for password hash
+        db_hash = db.execute("SELECT hash FROM users WHERE id = ?",
+                             fl.session.get("user_id"))
+
+        if len(db_hash) == 0:
+            return apology("error connecting to database", 500)
+
+        # Ensure old password is correct
+        if not ws.check_password_hash(
+            db_hash[0]["hash"], fl.request.form.get("old_password")
+        ):
+            return apology("invalid password", 403)
+
+        # Check for dupe password
+        if ws.check_password_hash(db_hash[0]["hash"], fl.request.form.get("new_password")):
+            return apology("new password cannot match old password", 400)
+
+        # If not dupe, update password hash in table
+        db.execute("UPDATE users SET hash = ? WHERE id = ?",
+                   ws.generate_password_hash(fl.request.form.get("new_password")),
+                   fl.session.get("user_id"))
+
+        fl.flash("Your password has been changed!")
+
+        # Redirect user to home
+        return fl.redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return fl.render_template("change_password.html")
+
+
+def apology(message, code=400):
+    """Render message as an apology to user."""
+    return fl.render_template("apology.html", top=code, bottom=message), code
+
+
 # Add user manually; not live on site yet; no password
-def register(user_id):
+def register(pw):
     with sqlite3.connect("database.db") as conn:
-        conn.execute("INSERT INTO users (username, date) VALUES (?, ?)", (user_id, int(time())))
+        h = ws.generate_password_hash(pw)
+        conn.execute(f"UPDATE users SET pwhash = {h} WHERE id = 1")
+
+register("deventerthedragon")

@@ -19,25 +19,36 @@
         <link href="/static/favicon.png" rel="icon">
 
         <title>The Space: {% block title %}{% endblock %}</title>
-
     </head>
 
     <body>
-        <div class="nav">
+        <header class="text-center">
             <a class="nav-link" href="/" btn><h1>The Space</h1></a>
-        </div>
-        <header>
+            <div class="nav">
+                <a class="nav-link" href="/login">Login</a>
+                <a class="nav-link" href="/register">Register</a>
+                <a class="nav-link" href="/logout">Logout</a>
+            </div>
+
             {% if get_flashed_messages() %}
                 <div class="alert alert-primary mb-0 text-center" role="alert">
                     {{ get_flashed_messages() | join(" ") }}
                 </div>
             {% endif %}
-
-            {% block header %}{% endblock %}
         </header>
+        <div class="sub-header text-center">
+            {% block header %}{% endblock %}
+        </div>
         <main class="container text-center">
             {% block main %}{% endblock %}
         </main>
-        <footer class="text-center"></footer>
+        <footer class="text-center">
+            <div class="signature">
+                <span class="mx-1">Frankobjank -</span>
+                <span class="filler-span">
+                    <span><a href="https://github.com/frankobjank/">Github</a></span>
+                </span>
+            </div>
+        </footer>
     </body>
 </html>
