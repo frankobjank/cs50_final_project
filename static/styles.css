@@ -1,3 +1,8 @@
+/* 
+    ChatGPT was used sparingly to solve a couple of formatting issues, 
+    like centering objects on the webpage and setting up css grids.
+*/
+
 /* use root to set global var grid size */
 :root {
     --grid-width: 9;
@@ -49,17 +54,16 @@ body {
 
 .container-custom {
     display: flex;
-    flex-wrap: wrap;  /* Allow items to wrap onto the next line */
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     margin-bottom: 1.5rem;
-    gap: 4rem; /* Adjust the spacing between items */
+    gap: 4rem;
 }
 
 footer {
     background-color: #000000;
     color: #ffffff;
-    /* padding-top: 6rem; */
     margin-top: 6rem;
     align-items: center;
     display: flex;
