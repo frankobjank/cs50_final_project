@@ -18,28 +18,36 @@
             <table class="table table-striped">
                 <thead>
                     <th></th>
-                    <th>Best Time (seconds)</th>
+                    <th>Best Time</th>
+                    <th>Average Time</th>
+                    <th>Games Won</th>
+                    <th>Total Games</th>
                     <th>Win Rate</th>
-                    <th>Average Game Time (seconds)</th>
                 </thead>
                 <tbody>
                     <tr>
                         <th scope="row">Easy</th>
                         <td>{{ data["easy"]["best_time"] }}</td>
-                        <td>{{ data["easy"]["win_rate"] }}</td>
                         <td>{{ data["easy"]["average_score"] }}</td>
+                        <td>{{ data["easy"]["games_won"] }}</td>
+                        <td>{{ data["easy"]["total_games"] }}</td>
+                        <td>{{ data["easy"]["win_rate"] }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Medium</th>
                         <td>{{ data["medium"]["best_time"] }}</td>
-                        <td>{{ data["medium"]["win_rate"] }}</td>
                         <td>{{ data["medium"]["average_score"] }}</td>
+                        <td>{{ data["medium"]["games_won"] }}</td>
+                        <td>{{ data["medium"]["total_games"] }}</td>
+                        <td>{{ data["medium"]["win_rate"] }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Hard</th>
                         <td>{{ data["hard"]["best_time"] }}</td>
-                        <td>{{ data["hard"]["win_rate"] }}</td>
                         <td>{{ data["hard"]["average_score"] }}</td>
+                        <td>{{ data["hard"]["games_won"] }}</td>
+                        <td>{{ data["hard"]["total_games"] }}</td>
+                        <td>{{ data["hard"]["win_rate"] }}</td>
                     </tr>
                 </tbody>
             </table>

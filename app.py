@@ -154,6 +154,8 @@ def minesweeper_stats():
                     if best_time == 0 or best_time > row["score"]:
                         best_time = row["score"]
                     
+        data[mode]["games_won"] = int(games_won)
+        data[mode]["total_games"] = int(total_games)
 
         if total_games != 0:
             data[mode]["win_rate"] = to_percent(games_won / total_games)
