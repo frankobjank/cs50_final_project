@@ -31,9 +31,6 @@ def after_request(response):
 
 @app.route("/")
 def index():
-    # Set user_id to 1 for debug
-    fl.session["user_id"] = "1"
-
     return fl.render_template("index.html")
 
 
@@ -73,28 +70,25 @@ def minesweeper():
                 print(f"SERVER TIME {server_score}")
                 print(f"CLIENT TIME {client_score}")
 
-                # Update database
-                with sqlite3.connect("database.db") as conn:
-                    conn.execute(
-                        """
-                        INSERT INTO ms_stats (mode, score, win, date, user_id)
-                        VALUES (?, ?, ?, ?, ?)
-                        """, (
-                            ms.difficulty,         # mode
-                            client_score,          # score
-                            ms.win,                # win
-                            int(time()),           # date
-                            fl.session["user_id"]  # user_id
+                # Update database only if logged in
+                if fl.session.get("user_id"):
+                    with sqlite3.connect("database.db") as conn:
+                        conn.execute(
+                            """
+                            INSERT INTO ms_stats (mode, score, win, date, user_id)
+                            VALUES (?, ?, ?, ?, ?)
+                            """, (
+                                ms.difficulty,         # mode
+                                client_score,          # score
+                                ms.win,                # win
+                                int(time()),           # date
+                                fl.session["user_id"]  # user_id
+                            )
                         )
-                    )
                     
             # Return mines, visible squares to client
             response = ms.update_packet()
             print(f"returning: {response}")
-            
-            # Banner for win; might have to add to response somehow
-            # if ms.win:
-                # fl.flash("Congratulations! You win!")
             
             return response
 
@@ -104,8 +98,6 @@ def minesweeper():
 
     # GET - create board and send
     elif fl.request.method == "GET":
-        # Set user_id to 1 for debug
-        fl.session["user_id"] = "1"
 
         # Get difficulty from client; defaults to easy
         difficulty = fl.request.args.get("difficulty", "easy")
@@ -120,6 +112,11 @@ def minesweeper():
 
 @app.route("/minesweeper/stats")
 def minesweeper_stats():
+    # If not logged in
+    if fl.session.get("user_id") is None:
+        return fl.render_template("minesweeper_stats.html", data=None)
+    
+    # Display stats if logged in
     db_responses = {}  # {"easy": [], "medium": [], "hard": []}
     
     # Query database and retrieve the stats
@@ -130,8 +127,8 @@ def minesweeper_stats():
         # To do in one transaction, could sort into mode as 
         for mode in modes:
             db_responses[mode] = conn.execute(
-                "SELECT score, win, date FROM ms_stats WHERE user_id = ? AND mode = ? AND score != 0", ("1", mode)
-            )    
+                "SELECT score, win, date FROM ms_stats WHERE user_id = ? AND mode = ? AND score != 0", (fl.session.get("user_id"), mode)
+            )
 
     # Calculate win rate and average time for win, best time for all modes
     data = {"easy": {}, "medium": {}, "hard": {}}  # {"easy": {win_rate: 0, ...} ...}
@@ -184,24 +181,36 @@ def login():
     if fl.request.method == "POST":
         # Ensure username was submitted
         if not fl.request.form.get("username"):
-            return apology("must provide username", 403)
+            return apology("Must provide a username.", 403)
 
         # Ensure password was submitted
         elif not fl.request.form.get("password"):
-            return apology("must provide password", 403)
+            return apology("Must provide a password.", 403)
 
+        db_response = {}
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?",
-                          fl.request.form.get("username"))
+        with sqlite3.connect("database.db") as conn:
+            conn.row_factory = dict_factory
+            # COLLATE NOCASE in table schema makes search case insensitive
+            db_response = conn.execute("SELECT * FROM users WHERE username = ?",
+                                       (fl.request.form.get("username"),))
+        
+        username = ""
+        pwhash = ""
+        user_id = ""
+        for row in db_response:
+            username = row["username"]
+            pwhash = row["pwhash"]
+            user_id = row["id"]
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not ws.check_password_hash(
-            rows[0]["hash"], fl.request.form.get("password")
-        ):
-            return apology("invalid username and/or password", 403)
+        if len(username) == 0 or not ws.check_password_hash(
+                                     pwhash, fl.request.form.get("password")):
+            return apology("Invalid username and/or password.", 403)
 
         # Remember which user has logged in
-        fl.session["user_id"] = rows[0]["id"]
+        fl.session["user_id"] = user_id
+        fl.session["username"] = username
 
         # Redirect user to home page
         return fl.redirect("/")
@@ -229,28 +238,34 @@ def register():
     if fl.request.method == "POST":
         # Ensure username was submitted
         if not fl.request.form.get("username"):
-            return apology("must provide username", 400)
+            return apology("Must provide a username.", 400)
 
         # Ensure password was submitted
         elif not fl.request.form.get("password"):
-            return apology("must provide password", 400)
+            return apology("Must provide a password.", 400)
 
         # Ensure password matches confirmation
         elif fl.request.form.get("password") != fl.request.form.get("confirmation"):
-            return apology("passwords must match", 400)
+            return apology("The two passwords must match.", 400)
 
+        db_response = {}
         # Attempt to register account, check for dupe username
         try:
             # If not dupe, add row to table
-            db.execute(
-                "INSERT INTO users (username, hash) VALUES (?, ?)",
-                fl.request.form.get("username"),
-                ws.generate_password_hash(fl.request.form.get("password"))
-            )
+            with sqlite3.connect("database.db") as conn:
+                conn.row_factory = dict_factory
+                db_response = conn.execute("""
+                                           INSERT INTO users (username, pwhash, date)
+                                           VALUES (?, ?, ?)
+                                           """,
+                                           (fl.request.form.get("username"),
+                                            ws.generate_password_hash(
+                                            fl.request.form.get("password")),
+                                            time()))
 
         # Dupe username
-        except ValueError:
-            return apology("username taken")
+        except sqlite3.IntegrityError:
+            return apology("This username is taken.")
 
         # Redirect user to login
         return fl.redirect("/login")
@@ -278,27 +293,35 @@ def change_password():
         elif fl.request.form.get("new_password") != fl.request.form.get("confirmation"):
             return apology("new password and confirmation must match", 400)
 
+        db_response = {}
         # Query database for password hash
-        db_hash = db.execute("SELECT hash FROM users WHERE id = ?",
-                             fl.session.get("user_id"))
+        with sqlite3.connect("database.db") as conn:
+            conn.row_factory = dict_factory
+            db_response = conn.execute("SELECT pwhash FROM users WHERE id = ?",
+                                       (fl.session.get("user_id"),))
 
-        if len(db_hash) == 0:
-            return apology("error connecting to database", 500)
+        pwhash_from_server = ""
+        
+        for row in db_response:
+            pwhash_from_server = row["pwhash"]
+
+        if len(pwhash_from_server) == 0:
+            return apology("Error connecting to database.", 500)
 
         # Ensure old password is correct
-        if not ws.check_password_hash(
-            db_hash[0]["hash"], fl.request.form.get("old_password")
-        ):
-            return apology("invalid password", 403)
+        if not ws.check_password_hash(pwhash_from_server, fl.request.form.get("old_password")):
+            return apology("Invalid password.", 403)
 
         # Check for dupe password
-        if ws.check_password_hash(db_hash[0]["hash"], fl.request.form.get("new_password")):
-            return apology("new password cannot match old password", 400)
+        if ws.check_password_hash(pwhash_from_server, fl.request.form.get("new_password")):
+            return apology("New password must be different from the old password.", 400)
 
         # If not dupe, update password hash in table
-        db.execute("UPDATE users SET hash = ? WHERE id = ?",
-                   ws.generate_password_hash(fl.request.form.get("new_password")),
-                   fl.session.get("user_id"))
+        with sqlite3.connect("database.db") as conn:
+            conn.row_factory = dict_factory
+            conn.execute("UPDATE users SET pwhash = ? WHERE id = ?",
+                   (ws.generate_password_hash(fl.request.form.get("new_password")),
+                   fl.session.get("user_id")))
 
         fl.flash("Your password has been changed!")
 
@@ -313,12 +336,3 @@ def change_password():
 def apology(message, code=400):
     """Render message as an apology to user."""
     return fl.render_template("apology.html", top=code, bottom=message), code
-
-
-# Add user manually; not live on site yet; no password
-def register(pw):
-    with sqlite3.connect("database.db") as conn:
-        h = ws.generate_password_hash(pw)
-        conn.execute(f"UPDATE users SET pwhash = {h} WHERE id = 1")
-
-register("deventerthedragon")

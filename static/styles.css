@@ -10,8 +10,6 @@
 .nav {
     background-color: #000000;
     color: #ffffff;
-    margin-bottom: 1.5rem;
-    padding: 1rem 1rem;
     justify-content: center;
 }
 
@@ -45,7 +43,7 @@ body {
     background-color: #dddddd;
 }
 
-a {
+.nav-link {
     color: #ffffff
 }
 
