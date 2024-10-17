@@ -24,8 +24,8 @@ In order to add an SQL element to the project, I decided to track players' stats
 ## [Static](/static/)
 
 * [favicon.png](static/favicon.png) - While I was testing, the webpage kept failing to load the favicon. Finally I looked up what that is and added an icon (my github profile picture).
-* [minesweeper_screenshot.png](static/minesweeper_screenshot.png) - This is the screenshot shown on the homepage to give the user a preview of what the game will look like. There is currently only one game there but I plan to add more later.
-* [minesweeper.js](static/minesweeper.js) - This file contains everything needed for rendering the actual minesweeper game. It uses a double `for` loop to create a `grid` with the number of rows and columns received by the server depending on the difficulty. It also creates the panel on the top of the board containing the number of mines remaining and timer. All the squares on the board are buttons that are assigned an index.
+* [minesweeper_screenshot.png](static/minesweeper_screenshot.png) - This is the screenshot shown on the homepage to give the user a preview of what the game will look like. There is currently only one game there but I plan to add more in the future.
+* [minesweeper.js](static/minesweeper.js) - This file contains everything needed for rendering the actual minesweeper game. It uses a double `for` loop to create a `grid` with the number of rows and columns received by the server depending on the difficulty. It also creates the panel on the top of the board containing the number of mines remaining and a timer. All the squares on the board are buttons that are assigned an index.
   * There's an AJAX request that gets sent every time a new square is clicked in order to get information from the server without reloading the page.
 
 ## [Templates](/templates/)
@@ -35,5 +35,3 @@ In order to add an SQL element to the project, I decided to track players' stats
 * [layout.html](/templates/layout.html) - This creates a template for all the pages on the site. It includes the header areas that allow users to navigate the site, and the footer that has my name and Github link.
 * [minesweeper_stats.html](/templates/minesweeper_stats.html) - If logged in, this will display the user's Minesweeper stats. It breaks up the stats by difficulty.
 * [minesweeper.html](/templates/minesweeper.html) - This is the page the javascript file fills in to render the Minesweeper game. Apart from that it has options to change the difficulty of the game by allowing users to choose between easy, medium, and hard. It also contains a link to view the user's stats.
-
-Thank you all for your time evaluating these projects. This class has been an amazing experience.
