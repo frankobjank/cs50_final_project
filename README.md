@@ -1,6 +1,6 @@
 # Minesweeper via flask
 
-## Video Demo:  <URL HERE>
+## Video Demo:  `<URL HERE>`
 
 ## Description
 

@@ -25,6 +25,7 @@
         <header class="text-center">
             <a class="nav-link" href="/" btn><h1>The Space</h1></a>
             <div class="nav">
+                <a class="nav-link" href="/"><h5>Home</h5></a>
                 {% if session["user_id"] %}
                     <a class="nav-link" href="/minesweeper/stats"><h5>{{ session["username"] }} - Stats</h5></a>
                     <a class="nav-link" href="/change_password"><h5>Change Password</h5></a>

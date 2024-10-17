@@ -88,11 +88,9 @@ def minesweeper():
                     
             # Return mines, visible squares to client
             response = ms.update_packet()
-            print(f"returning: {response}")
             
             return response
 
-        print(f"returning nothing; 204")
         # flask requires a return value; 204 status will keep browser on current page
         return ("", 204)
 
@@ -250,20 +248,18 @@ def register():
         elif fl.request.form.get("password") != fl.request.form.get("confirmation"):
             return apology("The two passwords must match.", 400)
 
-        db_response = {}
         # Attempt to register account, check for dupe username
         try:
             # If not dupe, add row to table
             with sqlite3.connect("database.db") as conn:
-                conn.row_factory = dict_factory
-                db_response = conn.execute("""
-                                           INSERT INTO users (username, pwhash, date)
-                                           VALUES (?, ?, ?)
-                                           """,
-                                           (fl.request.form.get("username"),
-                                            ws.generate_password_hash(
-                                            fl.request.form.get("password")),
-                                            time()))
+                conn.execute("""
+                            INSERT INTO users (username, pwhash, date)
+                            VALUES (?, ?, ?)
+                            """,
+                            (fl.request.form.get("username"),
+                            ws.generate_password_hash(
+                            fl.request.form.get("password")),
+                            time()))
 
         # Dupe username
         except sqlite3.IntegrityError:
