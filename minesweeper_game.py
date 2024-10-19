@@ -26,32 +26,6 @@ class Square:
                 adj = state.squares.get((self.x+dx, self.y+dy), None)
                 if adj is not None and adj != self and not adj.mine:
                     adj.adj += 1
-    
-
-    def get_adjacent_recursive(self, state):
-
-        # Double for-loop to get all adjacent squares
-        for dy in [-1, 0, 1]:
-            for dx in [-1, 0, 1]:
-                adj = state.squares.get((self.x+dx, self.y+dy), None)
-                if adj is not None and adj != self and not adj.visible:
-                    adj.visible = True
-                    state.visible.add(adj)
-                    
-                    # If adj is empty, run again
-                    if adj.adj == 0: 
-                        adj.get_adjacent_recursive(state)
-
-
-    def get_neighbors(self, state):
-        neighbors = set()
-        for dy in [-1, 0, 1]:
-            for dx in [-1, 0, 1]:
-                adj = state.squares.get((self.x+dx, self.y+dy), None)
-                if adj is not None and adj != self:
-                    neighbors.add(adj)
-
-        return neighbors
 
 
 class State:
@@ -67,7 +41,7 @@ class State:
         self.squares = {}
         self.mines = set()
         self.adjacent_to_mines = set()
-        self.visible = set()
+        self.visible_set = set()
 
         # Win/Lose
         self.win = False
@@ -147,6 +121,7 @@ class State:
         # Calc adj to mines
         for mine in self.mines:
             mine.get_adjacent_to_mines(state=self)
+
         empty_squares = []
         for sq in self.squares.values():
             if not sq.mine:
@@ -163,6 +138,27 @@ class State:
     def setup_packet(self):
         # Only need dimensions; keep mines and adj info hidden on server side
         return {"width": self.width, "height": self.height, "num_mines": self.num_mines, "difficulty": self.difficulty}
+
+
+    def reveal_adjacent_recursive(self, square):
+        
+        # Double for-loop to get all adjacent squares
+        for dy in [-1, 0, 1]:
+            for dx in [-1, 0, 1]:
+
+                # Skip over self
+                if dy == 0 and dx == 0:
+                    continue
+
+                adj = self.squares.get((square.x+dx, square.y+dy))
+                
+                if adj is not None and not adj.visible:
+                    adj.visible = True
+                    self.visible_set.add(adj)
+                    
+                    # If adj is empty, run again
+                    if adj.adj == 0: 
+                        self.reveal_adjacent_recursive(adj)
 
 
     def update_server(self, selection_index: str):
@@ -183,13 +179,13 @@ class State:
         # Hit a number
         elif square.adj > 0: 
             square.visible = True
-            self.visible.add(square)
+            self.visible_set.add(square)
 
         # Hit empty space; check to reveal additional spaces
         else:
             square.visible = True
-            self.visible.add(square)
-            square.get_adjacent_recursive(self)
+            self.visible_set.add(square)
+            self.reveal_adjacent_recursive(square)
         
         if self.check_for_win():
             self.win = True
@@ -198,6 +194,7 @@ class State:
         # If gameover; freeze time
         if self.game_over:
             self.score = time() - self.start_time
+
 
     def update_packet(self):
         # Reveal adj, vis, mines as needed
@@ -220,7 +217,7 @@ class State:
 
     # Check if all non-mine squares are visible
     def check_for_win(self):
-        return len(self.visible) == (self.width * self.height) - len(self.mines)
+        return len(self.visible_set) == (self.width * self.height) - len(self.mines)
 
 
 # state = State()

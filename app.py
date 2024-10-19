@@ -63,9 +63,6 @@ def minesweeper():
                 server_score = int(ms.score)
                 client_score = int(fl.request.form.get("score"))
 
-                print(f"SERVER TIME {server_score}")
-                print(f"CLIENT TIME {client_score}")
-
                 # Test if margin of error is less than 20%
                 if abs(server_score - client_score) < (0.2 * server_score):
                     server_score = client_score
