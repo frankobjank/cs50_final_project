@@ -2,7 +2,7 @@
 
 ## Video Demo
 
-[Jacob Frank - CS50 Final Project Video](https://youtu.be/8_vdR2AFTJk)
+[Jacob Frank - CS50 Final Project Video](https://youtu.be/68rjMMaCvhI)
 
 ## Links to project
 
