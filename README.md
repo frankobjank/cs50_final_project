@@ -1,6 +1,8 @@
 # Minesweeper via flask
 
-## Video Demo:  `<URL HERE>`
+## Video Demo
+
+[Jacob Frank - CS50 Final Project Video](https://youtu.be/8_vdR2AFTJk)
 
 ## Description
 

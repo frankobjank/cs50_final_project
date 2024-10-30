@@ -39,8 +39,6 @@ def minesweeper():
     
     # POST - receive requests and update board
     if fl.request.method == "POST":
-        
-        print(f"request: {fl.request.form}")
 
         # Redirect to initial `get` request on reset
         if fl.request.form.get("reset"):
