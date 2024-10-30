@@ -4,6 +4,12 @@
 
 [Jacob Frank - CS50 Final Project Video](https://youtu.be/8_vdR2AFTJk)
 
+## Links to project
+
+[My Minesweeper](https://frankobjank.pythonanywhere.com/)
+
+[Source code on Github](https://github.com/frankobjank/cs50_final_project)
+
 ## Description
 
 My goal for this project was to expand the `Homepage` project from Week 8 into a fully-fledged web app. I have made a couple of games in Python prior to enrolling in cs50 and I want to be able to port those games to the web and make them accessible from my homepage.
