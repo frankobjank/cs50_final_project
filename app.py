@@ -6,7 +6,7 @@ from time import time
 import werkzeug.security as ws
 
 # Python files
-from helpers import dict_factory, to_percent
+from helpers import *
 import minesweeper_game
 
 # link to access app for debug http://127.0.0.1:5000
@@ -46,6 +46,10 @@ def minesweeper():
 
         # Retrieve minesweeper state from session
         ms = fl.session.get("ms")
+
+        # Prevents accessing from `None`
+        if not ms:
+            return ("", 204)
 
         # Square index from client
         square_idx = fl.request.form.get("square")
@@ -105,10 +109,15 @@ def minesweeper():
 
 @app.route("/minesweeper/stats")
 def minesweeper_stats():
-    # If not logged in
-    if fl.session.get("user_id") is None:
-        return fl.render_template("minesweeper_stats.html", data=None)
+    # Remember last page to redirect user after login
+    fl.session["last_page"] = fl.url_for("minesweeper_stats")
     
+    user_id = fl.session.get("user_id", 0)
+    
+    # If not logged in; user_id is stored as int
+    if user_id == 0:
+        return fl.render_template("minesweeper_stats.html", data=None)
+      
     # Display stats if logged in
     db_responses = {}  # {"easy": [], "medium": [], "hard": []}
     
@@ -168,9 +177,6 @@ def minesweeper_stats():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-
-    # Forget any user_id
-    fl.session.clear()
 
     # User reached route via POST (as by submitting a form via POST)
     if fl.request.method == "POST":
@@ -269,6 +275,8 @@ def register():
 
 
 @app.route("/change_password", methods=["GET", "POST"])
+# This is hidden if not logged in, but adding server-side validation
+@login_required
 def change_password():
     """Change password"""
 
