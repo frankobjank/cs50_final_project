@@ -4,11 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.documentElement.style.setProperty('--grid-width', serverBoard.width);
     document.documentElement.style.setProperty('--grid-height', serverBoard.height);
     
-    /* ChatGPT was used to jump-start creating the rows and columns of the
-    board in javascript. The finished project does not contain much of that
-    toriginal ChatGPT code. */
-    document.getElementById('board-container').style.setProperty('width', serverBoard.width * 30)
-    document.getElementById('board-container').style.setProperty('height', serverBoard.height * 30)
+    let pixelMultiplier = 30
+
+    document.getElementById('board-container').style.setProperty('width', serverBoard.width * pixelMultiplier)
+    document.getElementById('board-container').style.setProperty('height', serverBoard.height * pixelMultiplier)
 
     // Keep track if game has started for timer
     hasStarted = false;
@@ -159,7 +158,7 @@ function createBoard(serverBoard) {
             b.id = index;
 
             // Add EventListeners to button
-            b.addEventListener("mousedown", (event) => {
+            b.addEventListener('mousedown', (event) => {
                 
                 if (!hasStarted) {
                     hasStarted = true;
@@ -191,9 +190,6 @@ function createBoard(serverBoard) {
                 
                 // Right mouse click
                 else if (event.button === 2 && !gameOver) {
-
-                    // SUPPOSED TO PREVENT CONTEXT MENU APPEARING; NOT WORKING
-                    event.preventDefault();
                     
                     // Toggle flag true/false
                     b.toggleAttribute('data-flagged');
